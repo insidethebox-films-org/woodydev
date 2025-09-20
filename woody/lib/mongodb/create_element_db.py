@@ -26,7 +26,7 @@ def create_element_db(groupTypeCombo, groupName, elementName):
         id_type = "shot_id"
 
     # Check if document with the same name already exists
-    if db.connect[collection_name].find_one({"name": elementName}):
+    if db.connect[collection_name].find_one({"name": elementName, group_type: groupName}):
         print(f"Document '{elementName}' already exists in collection '{collection_name}'.")
         return
     
