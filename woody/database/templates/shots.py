@@ -1,6 +1,6 @@
-assets_template = {
-    "asset_id": None,
-    "group": "",
+shots_template = {
+    "shot_id": None,
+    "sequence": "",
     "name": "",
     "latest_version": None,
     "created_time": "",

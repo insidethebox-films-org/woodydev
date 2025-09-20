@@ -12,18 +12,22 @@ def create_project_db():
     directory = str(woody.projectDirectory)
 
     db = DB_instance(name)
+
+    # Check if collection 'settings' already exists
+    if "settings" in db.collections:
+        print(f"Collection 'settings' already exists in database '{db.name}'.")
+        return
     
-    collection_name = "settings"
-    db.add_collection(collection_name)
-    print(f"Collection '{collection_name}' is set up in database '{db.name}'.") #TODO
+    #Create 'settings' collection
+    db.add_collection("settings")
     
     settings = copy.deepcopy(settings_template)
     settings["project_name"] = db.name
     settings["location"] = directory
     settings["created_time"] = datetime.now(timezone.utc)
-    db.add_document(collection_name, settings)
-    
-    
+    db.add_document("settings", settings)
 
+    print(f"Collection 'settings' is set up in database '{db.name}'.")
 
+    
 

@@ -1,7 +1,9 @@
 from . import style
 
-from ..lib.folder import create_groups_sequences_fd
-from ..lib.mongodb import create_groups_sequences_db
+from ..lib.folder import create_group_sequence_fd
+from ..lib.mongodb import create_group_sequence_db
+from ..lib.mongodb import create_element_db
+from ..lib.folder import create_element_fd
 
 import customtkinter
 
@@ -20,11 +22,13 @@ class ProjectFrame:
             )
         self.frame.grid_columnconfigure(0, weight=1)
         
-    def create_group(self):
-        create_groups_sequences_fd(self.groupTypeComboBox.get(), self.groupNameEntry.get())
-        create_groups_sequences_db(self.groupTypeComboBox.get(), self.groupNameEntry.get())
+    def create_element(self):
+        create_group_sequence_fd(self.groupTypeComboBox.get(), self.groupsNameComboBox.get())
+        create_group_sequence_db(self.groupTypeComboBox.get(), self.groupsNameComboBox.get())
+        create_element_db(self.groupTypeComboBox.get(), self.groupsNameComboBox.get(), self.elementNameEntry.get())
+        create_element_fd(self.groupTypeComboBox.get(), self.groupsNameComboBox.get(), self.elementNameEntry.get())
     
-    def create_widgets(self):
+    def create_widgets(self):        
         
         # Project label
         self.projectLabel = customtkinter.CTkLabel(
@@ -33,34 +37,19 @@ class ProjectFrame:
             **style.HEADER_LABEL
 
         )
-        self.projectLabel.grid(row=0, column=0, sticky="nw", padx=8, pady=(8, 0))  
+        self.projectLabel.grid(row= 0, column=0, sticky="nw", padx=8, pady=(8, 0))  
         
         separator = customtkinter.CTkFrame(self.frame, height=2, fg_color="#414141")
         separator.grid(row=1, column=0, sticky="ew", padx=5, pady=(2, 8), columnspan=2) 
-        
-        # Group name label
-        self.grouptNameLabel = customtkinter.CTkLabel(
-            self.frame, 
-            text="Group Name",
-            **style.BODY_LABEL
-        )
-        self.grouptNameLabel.grid(row=2, column=0, sticky="nw", padx=8)
-        
-        # Group name entry
-        self.groupNameEntry = customtkinter.CTkEntry(
-            self.frame,
-            height=25
-            )
-        self.groupNameEntry.grid(row=3, column=0, sticky="new", padx=8)
-                
+
         # Group type label
-        self.grouptTypeLabel = customtkinter.CTkLabel(
+        self.groupTypeLabel = customtkinter.CTkLabel(
             self.frame, 
             text="Group Type",
             **style.BODY_LABEL
         )
-        self.grouptTypeLabel.grid(row=4, column=0, sticky="nw", padx=8)        
-                
+        self.groupTypeLabel.grid(row=2, column=0, sticky="nw", padx=8)        
+        
         # Group type combobox
         groupTypeValues = [
             "Assets Group",
@@ -72,14 +61,49 @@ class ProjectFrame:
             values=groupTypeValues,
             height=25
         )
-        self.groupTypeComboBox.grid(row=5, column=0, sticky="new", padx=8)
+        self.groupTypeComboBox.grid(row=3, column=0, sticky="new", padx=8)
         
-        # Create group button
+        # Group name label
+        self.groupNameLabel = customtkinter.CTkLabel(
+            self.frame, 
+            text="Group Name",
+            **style.BODY_LABEL
+        )
+        self.groupNameLabel.grid(row=4, column=0, sticky="nw", padx=8)
+        
+        # Group name combobox
+        groupNameValues = []
+        
+        self.groupsNameComboBox = customtkinter.CTkComboBox(
+            self.frame,
+            values=groupNameValues,
+            height=25
+        )
+        self.groupsNameComboBox.grid(row=5, column=0, sticky="new", padx=8)
+        
+        # Element name label
+        self.groupNameLabel = customtkinter.CTkLabel(
+            self.frame, 
+            text="Element Name",
+            **style.BODY_LABEL
+        )
+        self.groupNameLabel.grid(row=6, column=0, sticky="nw", padx=8)
+        
+        # Element Name
+        self.elementNameEntry = customtkinter.CTkEntry(
+            self.frame,
+            height=25    
+        )
+        self.elementNameEntry.grid(row=7, column=0, sticky="new", padx=8)
+        
+        # Create Element
         self.createGroupButton = customtkinter.CTkButton(
             self.frame,
-            text="Create Group",
+            text="Create Element",
             **style.BUTTON_STYLE,
             
-            command=self.create_group
+            command=self.create_element
         )
-        self.createGroupButton.grid(row=6, sticky="nwe", padx=8, pady=8)
+        self.createGroupButton.grid(row=8, sticky="nwe", padx=8, pady=8)
+
+

@@ -6,7 +6,7 @@ import os
 class WoodyApp:
     def __init__(self):
         self.mainWindow = customtkinter.CTk()
-        self.mainWindow.geometry("300x620")
+        self.mainWindow.geometry("300x700")
         self.mainWindow.title("Woody")
         
         # Create icon
