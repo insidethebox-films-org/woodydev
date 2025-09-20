@@ -1,0 +1,17 @@
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore zip files like woody.zip
+
+updateZip.py
+
+# Ignore OS metadata
+.DS_Store
+Thumbs.db
+
+# Ignore Preferences
+prefs/
