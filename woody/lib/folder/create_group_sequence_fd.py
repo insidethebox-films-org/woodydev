@@ -1,7 +1,7 @@
 from .create_folders_subfolders import create_folders_subfolders
 from ...tool import WoodyInstance
 
-def create_groups_sequences_fd(type, folder_name):
+def create_group_sequence_fd(type, folder_name):
     
     woody = WoodyInstance()
     
