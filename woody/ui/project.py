@@ -1,17 +1,22 @@
 from . import style
 
+from ..lib.folder import create_element_fd
 from ..lib.folder import create_group_sequence_fd
 from ..lib.mongodb import create_group_sequence_db
 from ..lib.mongodb import create_element_db
-from ..lib.folder import create_element_fd
+from ..lib.mongodb import get_group_sequence_names
 
 import customtkinter
+import threading
+import time
 
 class ProjectFrame:
     def __init__(self, parent):
         self.parent = parent
         self.create_frame()
         self.create_widgets()
+        
+        threading.Thread(target=self.refresh_groups_name_comboBox, daemon=True).start()
             
     def create_frame(self):
         self.frame = customtkinter.CTkFrame(
@@ -22,6 +27,21 @@ class ProjectFrame:
             )
         self.frame.grid_columnconfigure(0, weight=1)
         
+    def refresh_groups_name_comboBox(self):
+        while True:
+            try:
+                current = self.groupsNameComboBox.get()
+                new_values = get_group_sequence_names(self.groupTypeComboBox.get())
+                
+                if new_values != self.groupsNameComboBox.cget("values"):
+                    self.groupsNameComboBox.configure(values=new_values)
+                    if current in new_values:
+                        self.groupsNameComboBox.set(current)
+                
+                time.sleep(2)
+            except:
+                time.sleep(2)
+    
     def create_element(self):
         create_group_sequence_fd(self.groupTypeComboBox.get(), self.groupsNameComboBox.get())
         create_group_sequence_db(self.groupTypeComboBox.get(), self.groupsNameComboBox.get())
@@ -59,8 +79,10 @@ class ProjectFrame:
         self.groupTypeComboBox = customtkinter.CTkComboBox(
             self.frame,
             values=groupTypeValues,
-            height=25
+            height=25,
+            state="readonly"
         )
+        self.groupTypeComboBox.set("Assets Group")
         self.groupTypeComboBox.grid(row=3, column=0, sticky="new", padx=8)
         
         # Group name label
@@ -72,13 +94,12 @@ class ProjectFrame:
         self.groupNameLabel.grid(row=4, column=0, sticky="nw", padx=8)
         
         # Group name combobox
-        groupNameValues = []
-        
         self.groupsNameComboBox = customtkinter.CTkComboBox(
             self.frame,
-            values=groupNameValues,
+            values=get_group_sequence_names(self.groupTypeComboBox.get()),
             height=25
         )
+        self.groupsNameComboBox.set("")
         self.groupsNameComboBox.grid(row=5, column=0, sticky="new", padx=8)
         
         # Element name label
