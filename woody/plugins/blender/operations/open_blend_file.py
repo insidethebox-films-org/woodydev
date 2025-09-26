@@ -3,6 +3,7 @@ import subprocess
 import time
 
 from pathlib import Path
+from .get_zip_hash import get_zip_hash
 
 def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
     """Opens existing blend file with addon update check
@@ -35,15 +36,9 @@ import os
 import hashlib
 import json
 
-def get_zip_hash(zip_path):
-    if not os.path.exists(zip_path):
-        return ""
-    with open(zip_path, 'rb') as f:
-        return hashlib.md5(f.read()).hexdigest()
-
 addon_name = "woody_blender_addon"
 zip_path = r"{addon_zip}"
-current_hash = get_zip_hash(zip_path)
+current_hash = "{get_zip_hash(addon_zip)}"
 
 # Get stored hash if it exists
 prefs_path = os.path.join(bpy.utils.user_resource('CONFIG'), "woody_addon_hash.json")
