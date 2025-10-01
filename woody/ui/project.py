@@ -6,6 +6,8 @@ from ..lib.mongodb import create_group_sequence_db
 from ..lib.mongodb import create_element_db
 from ..lib.mongodb import get_group_sequence_names
 
+from ..plugins.blender.blender_instance import BlenderInstance
+
 import customtkinter
 import threading
 import time
@@ -15,6 +17,8 @@ class ProjectFrame:
         self.parent = parent
         self.create_frame()
         self.create_widgets()
+
+        self.blender = BlenderInstance()
         
         threading.Thread(target=self.refresh_groups_name_comboBox, daemon=True).start()
             
@@ -47,6 +51,29 @@ class ProjectFrame:
         create_group_sequence_db(self.groupTypeComboBox.get(), self.groupsNameComboBox.get())
         create_element_db(self.groupTypeComboBox.get(), self.groupsNameComboBox.get(), self.elementNameEntry.get())
         create_element_fd(self.groupTypeComboBox.get(), self.groupsNameComboBox.get(), self.elementNameEntry.get())
+
+
+    def _create_blend_file(self):
+        group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
+        self.blender.create_file(
+            group_type,
+            self.groupsNameComboBox.get(),
+            self.elementNameEntry.get()
+        )
+
+    def _open_blend_file(self):
+        group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
+        self.blender.open_file(
+            group_type,
+            self.groupsNameComboBox.get(), 
+            self.elementNameEntry.get()
+        )
+
+    def _dev_update(self):
+        if self.blender.dev_update():
+            print("Dev Update Complete", "Addon zip has been recreated successfully!")
+        else:
+            print("Dev Update Failed", "Failed to recreate addon zip. Check the console for details.")
     
     def create_widgets(self):        
         
@@ -126,5 +153,32 @@ class ProjectFrame:
             command=self.create_element
         )
         self.createGroupButton.grid(row=8, sticky="nwe", padx=8, pady=8)
+
+
+
+        # Add Blender buttons
+        self.createBlendButton = customtkinter.CTkButton(
+            self.frame,
+            text="Create Blend File",
+            **style.BUTTON_STYLE,
+            command=self._create_blend_file
+        )
+        self.createBlendButton.grid(row=9, sticky="nwe", padx=8, pady=(0,4))
+
+        self.openBlendButton = customtkinter.CTkButton(
+            self.frame,
+            text="Open in Blender",
+            **style.BUTTON_STYLE,
+            command=self._open_blend_file
+        )
+        self.openBlendButton.grid(row=10, sticky="nwe", padx=8, pady=(0,8))
+
+        self.devUpdateButton = customtkinter.CTkButton(
+        self.frame,
+        text="Dev Update",
+        **style.BUTTON_STYLE,
+        command=self._dev_update
+        )
+        self.devUpdateButton.grid(row=12, sticky="nwe", padx=8, pady=(0,8))
 
 
