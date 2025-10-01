@@ -5,6 +5,7 @@ from ..lib.folder import create_group_sequence_fd
 from ..lib.mongodb import create_group_sequence_db
 from ..lib.mongodb import create_element_db
 from ..lib.mongodb import get_group_sequence_names
+from ..lib.mongodb import create_blend_db
 
 from ..plugins.blender.blender_instance import BlenderInstance
 
@@ -55,18 +56,32 @@ class ProjectFrame:
 
     def _create_blend_file(self):
         group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
-        self.blender.create_file(
-            group_type,
-            self.groupsNameComboBox.get(),
-            self.elementNameEntry.get()
-        )
+        
+        # Try to create the database entry first
+        if create_blend_db(group_type, self.groupsNameComboBox.get(), self.elementNameEntry.get(), self.blendNameEntry.get()):
+            # Only create the file if database entry was successful
+            success = self.blender.create_file(
+                group_type,
+                self.groupsNameComboBox.get(),
+                self.elementNameEntry.get(),
+                self.blendNameEntry.get()
+            )
+            
+            if success:
+                print("Blend file created successfully!")
+            else:
+                print("Failed to create blend file")
+        else:
+            print("Failed to create database entry - blend file not created")
+       
 
     def _open_blend_file(self):
         group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
         self.blender.open_file(
             group_type,
             self.groupsNameComboBox.get(), 
-            self.elementNameEntry.get()
+            self.elementNameEntry.get(),
+            self.blendNameEntry.get()
         )
 
     def _dev_update(self):
@@ -154,7 +169,20 @@ class ProjectFrame:
         )
         self.createGroupButton.grid(row=8, sticky="nwe", padx=8, pady=8)
 
-
+        # Blend name label
+        self.groupNameLabel = customtkinter.CTkLabel(
+            self.frame, 
+            text="Blend FileName",
+            **style.BODY_LABEL
+        )
+        self.groupNameLabel.grid(row=9, column=0, sticky="nw", padx=8)
+        
+        # Blend Name
+        self.blendNameEntry = customtkinter.CTkEntry(
+            self.frame,
+            height=25    
+        )
+        self.blendNameEntry.grid(row=10, column=0, sticky="new", padx=8)
 
         # Add Blender buttons
         self.createBlendButton = customtkinter.CTkButton(
@@ -163,7 +191,7 @@ class ProjectFrame:
             **style.BUTTON_STYLE,
             command=self._create_blend_file
         )
-        self.createBlendButton.grid(row=9, sticky="nwe", padx=8, pady=(0,4))
+        self.createBlendButton.grid(row=11, sticky="nwe", padx=8, pady=(0,4))
 
         self.openBlendButton = customtkinter.CTkButton(
             self.frame,
@@ -171,7 +199,7 @@ class ProjectFrame:
             **style.BUTTON_STYLE,
             command=self._open_blend_file
         )
-        self.openBlendButton.grid(row=10, sticky="nwe", padx=8, pady=(0,8))
+        self.openBlendButton.grid(row=12, sticky="nwe", padx=8, pady=(0,8))
 
         self.devUpdateButton = customtkinter.CTkButton(
         self.frame,
@@ -179,6 +207,6 @@ class ProjectFrame:
         **style.BUTTON_STYLE,
         command=self._dev_update
         )
-        self.devUpdateButton.grid(row=12, sticky="nwe", padx=8, pady=(0,8))
+        self.devUpdateButton.grid(row=13, sticky="nwe", padx=8, pady=(0,8))
 
 

@@ -1,7 +1,7 @@
 import os
 
 def get_blend_path(project_dir: str, project_name: str, group_type: str, 
-                   group_name: str, element_name: str) -> str:
+                   group_name: str, element_name: str, blend_name: str) -> str:
     """Constructs blend file path
     
     Args:
@@ -20,7 +20,7 @@ def get_blend_path(project_dir: str, project_name: str, group_type: str,
         group_type,
         group_name,
         element_name,
-        f"{element_name}.blend"
+        f"{blend_name}.blend"
     ]
     
     if project_dir.startswith(r'\\'): 
