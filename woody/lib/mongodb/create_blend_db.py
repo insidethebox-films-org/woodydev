@@ -7,6 +7,17 @@ import copy
 from datetime import datetime, timezone
 
 def create_blend_db(group_type, group_name, element_name, blend_name):
+    """
+    Creates a new blend document in the MongoDB 'blends' collection for a specified element.
+    Args:
+        group_type (str): The type of group the element belongs to ('assets' or 'shots').
+        group_name (str): The name of the group (e.g., asset or shot group).
+        element_name (str): The name of the element (e.g., asset or shot name).
+        blend_name (str): The name to assign to the new blend document.
+    Returns:
+        bool: True if the blend document was created successfully, False otherwise.
+    """
+    
     woody = WoodyInstance()
     db = DB_instance(woody.projectName)
     blend = BlenderInstance()

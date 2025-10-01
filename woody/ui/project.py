@@ -177,7 +177,7 @@ class ProjectFrame:
         )
         self.groupNameLabel.grid(row=9, column=0, sticky="nw", padx=8)
         
-        # Blend name Name
+        # Blend Name
         self.blendNameEntry = customtkinter.CTkEntry(
             self.frame,
             height=25    
