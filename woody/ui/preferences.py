@@ -3,6 +3,7 @@ from . import style
 from ..utils import save_preferences_json, load_preferences_json
 from ..lib.folder import create_project_fd
 from ..lib.mongodb import create_project_db
+from ..plugins.blender.install_blender_libraries import install_blender_libraries
 
 import customtkinter
 
@@ -43,8 +44,23 @@ class PreferencesFrame:
             self.blenderExecutableEntry.insert(0, preferences.get("blenderExecutable", ""))
     
     def create_project(self):
+        self.save_preferances()
+        
+        # Get the Blender executable path
+        blender_executable_path = self.blenderExecutableEntry.get().strip()
+        if not blender_executable_path:
+            print("Blender executable path is required to install libraries.")
+            return
+        
         create_project_fd()
         create_project_db()
+
+        # Install required libraries into Blender
+        print("Installing required libraries into Blender...")
+        if install_blender_libraries(blender_executable_path):
+            print("Project creation completed successfully!")
+        else:
+            print("Warning: Project created but library installation failed")
     
     def create_widgets(self):
         
