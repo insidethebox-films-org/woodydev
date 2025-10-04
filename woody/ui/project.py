@@ -10,6 +10,7 @@ from ..lib.mongodb import create_blend_db
 from ..plugins.blender.blender_instance import BlenderInstance
 
 import customtkinter
+import re
 import threading
 import time
 
@@ -55,6 +56,15 @@ class ProjectFrame:
 
 
     def _create_blend_file(self):
+        blend_name = self.blendNameEntry.get().strip()
+        # Validate blend name - prevent _latest and _v* patterns
+        if self._is_invalid_blend_name(blend_name):
+            print(
+                "Invalid Name", 
+                "Blend name cannot contain '_latest' or version suffixes like '_v1', '_v2', etc.\n"
+                "These suffixes are reserved for the versioning system."
+            )
+            return
         group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
         
         # Try to create the database entry first
@@ -74,6 +84,13 @@ class ProjectFrame:
         else:
             print("Failed to create database entry - blend file not created")
        
+    def _is_invalid_blend_name(self, name: str) -> bool:
+        """Check if blend name contains reserved suffixes"""
+        if "_latest" in name:
+            return True
+        if re.search(r"_v\d+", name):
+            return True
+        return False
 
     def _open_blend_file(self):
         group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
