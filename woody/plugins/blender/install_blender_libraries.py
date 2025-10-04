@@ -9,9 +9,9 @@ def install_blender_libraries(blender_executable_path: str) -> bool:
         blender_path = Path(blender_executable_path)
         
         if sys.platform == "win32":
-            python_exe = blender_path / "4.2" / "python" / "bin" / "python.exe"
+            python_exe = blender_path / "4.2" / "python" / "bin" / "python.exe"  #TODO - make version dynamic
         else:
-            python_exe = blender_path / "python" / "bin" / "python"
+            python_exe = blender_path / "python" / "bin" / "python"  #TODO check Mac path
         
         if not python_exe.exists():
             print(f"Error: Blender Python executable not found at {python_exe}")
@@ -20,7 +20,7 @@ def install_blender_libraries(blender_executable_path: str) -> bool:
         print(f"Installing to Blender Python: {python_exe}")
         
         # Get the target site-packages directory
-        site_packages_path = python_exe.parent.parent / "Lib" / "site-packages"  # Note: capital "Lib"
+        site_packages_path = python_exe.parent.parent / "Lib" / "site-packages"  # Note: capital "Lib" #TODO might be different on Linux/Mac
         print(f"Target site-packages: {site_packages_path}")
         
         # Install required libraries
@@ -62,7 +62,7 @@ import sys
 sys.path.insert(0, r'{site_packages_path}')
 import {library}
 print('SUCCESS: {library} installed correctly')
-print('Version:', {library}.version)
+print('Version:', {library}.version)  #TODO not all libraries may have version attribute
 print('Location:', {library}.__file__)
 """
             ], capture_output=True, text=True)
