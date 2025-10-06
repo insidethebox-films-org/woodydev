@@ -66,12 +66,3 @@ def build_tree_data():
             })
     
     return [assets_tree, shots_tree]
-
-
-groups, sequences = get_groups_sequences()
-assets, shots = get_assets_shots()
-
-print(groups, sequences, assets, shots)
-print("\nTree structure:")
-tree_data = build_tree_data()
-print(tree_data)
