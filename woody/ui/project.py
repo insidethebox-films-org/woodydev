@@ -65,20 +65,23 @@ class ProjectFrame:
                 "These suffixes are reserved for the versioning system."
             )
             return
+        
+        # Append _latest to the blend name for file creation
+        blend_name_with_latest = f"{blend_name}_latest"
         group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
         
         # Try to create the database entry first
-        if create_blend_db(group_type, self.groupsNameComboBox.get(), self.elementNameEntry.get(), self.blendNameEntry.get()):
+        if create_blend_db(group_type, self.groupsNameComboBox.get(), self.elementNameEntry.get(), blend_name):
             # Only create the file if database entry was successful
             success = self.blender.create_file(
                 group_type,
                 self.groupsNameComboBox.get(),
                 self.elementNameEntry.get(),
-                self.blendNameEntry.get()
+                blend_name_with_latest
             )
             
             if success:
-                print("Blend file created successfully!")
+                print(f"Blend file created successfully: {blend_name_with_latest}")
             else:
                 print("Failed to create blend file")
         else:
