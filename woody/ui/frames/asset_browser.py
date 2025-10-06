@@ -11,7 +11,7 @@ class AssetBrowserFrame:
             self.parent,
             corner_radius=8,        
             border_width=2,          
-            border_color="red",
+            border_color="#5a5a5a",
             )
         self.frame.grid_columnconfigure(0, weight=1)
     

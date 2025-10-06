@@ -30,28 +30,31 @@ class WoodyApp:
         
         # Header
         self.header_frame = HeaderFrame(self.mainWindow)
-        self.header_frame.frame.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=3, pady=3)
+        self.header_frame.frame.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=3, pady=(3, 1))
 
         # Tools
         self.tools_frame = ToolsFrame(self.mainWindow)
-        self.tools_frame.frame.grid(row=1, column=0, rowspan=2, sticky="nswe", padx=3, pady=3)
+        self.tools_frame.frame.grid(row=1, column=0, rowspan=2, sticky="nswe", padx=(3, 1), pady=3)
         
-        # Asset Brwoser
+        # Asset Browser
         self.asset_browser_frame = AssetBrowserFrame(self.mainWindow)
         self.asset_browser_frame.frame.grid(row=1, column=1, columnspan=3, sticky="nswe", padx=3, pady=3)
-
+        
+        # Asset Details
         self.asset_details_frame = AssetDetailsFrame(self.mainWindow)
-        self.asset_details_frame.frame.grid(row=2, column=1, sticky="nswe", padx=3, pady=3)
-
+        self.asset_details_frame.frame.grid(row=2, column=1, sticky="nswe", padx=(3, 0), pady=(0, 3))
+        
+        # Scenes
         self.scenes_frame = ScenesFrame(self.mainWindow)
-        self.scenes_frame.frame.grid(row=2, column=2, sticky="nswe", padx=3, pady=3)
-
+        self.scenes_frame.frame.grid(row=2, column=2, sticky="nswe", padx=(3, 0), pady=(0, 3))
+        
+        # Publishes
         self.publishes_frame = PublishesFrame(self.mainWindow)
-        self.publishes_frame.frame.grid(row=2, column=3, sticky="nswe", padx=3, pady=3)
+        self.publishes_frame.frame.grid(row=2, column=3, sticky="nswe", padx=3, pady=(0, 3))
 
         # Status Bar
         self.status_bar_frame = StatusBarFrame(self.mainWindow)
-        self.status_bar_frame.frame.grid(row=3, column=0, columnspan=4, sticky="nswe", padx=3, pady=3)
+        self.status_bar_frame.frame.grid(row=3, column=0, columnspan=4, sticky="nswe", padx=3, pady=(0, 3))
 
     def run(self):
         self.mainWindow.mainloop()
