@@ -5,6 +5,8 @@ import shutil
 import sys
 from pathlib import Path
 
+from ..prefs.load_woody_prefs import load_woody_preferences
+
 class WOODY_OT_version_up(bpy.types.Operator):
     bl_idname = "woody.version_up"
     bl_label = "Version Up"
@@ -64,6 +66,9 @@ class WOODY_OT_version_up(bpy.types.Operator):
                 if backup_file.exists():
                     os.remove(backup_file)
             
+            # Update database with new version info
+            self.update_database(base_filename, str(new_file_path), str(new_latest_path), next_version)
+            
             print(f"Created version: {new_file_path}")
             print(f"Working file: {new_latest_path}")
             self.report({'INFO'}, f"Version {next_version} created successfully")
@@ -73,4 +78,87 @@ class WOODY_OT_version_up(bpy.types.Operator):
         except Exception as e:
             self.report({'ERROR'}, f"Version up failed: {str(e)}")
             return {'CANCELLED'}
+        
+    def update_database(self, blend_name: str, version_path: str, latest_path: str, version_number: int):
+        """Update database with new version information"""
+        try:
+            # Import required libraries (now available thanks to install_blender_libraries)
+            from pymongo import MongoClient
+            from datetime import datetime, timezone
+            
+            # Load preferences directly from JSON
+            prefs = load_woody_preferences()
+            if not prefs:
+                print("Could not load woody preferences")
+                return
+            
+            # Get database connection info
+            mongo_url = prefs.get("mongoDBAddress")
+            project_name = prefs.get("projectName")
+            
+            if not mongo_url or not project_name:
+                print("Warning: MongoDB address or project name not found in preferences")
+                return
+            
+            print(f"Connecting to database: {project_name} at {mongo_url}")
+            
+            # Connect to MongoDB
+            client = MongoClient(mongo_url)
+            db = client[project_name]
+            
+            # Find the blend document
+            blend_doc = db["blends"].find_one({"name": blend_name})
+            
+            if not blend_doc:
+                print(f"Warning: Blend document '{blend_name}' not found in database")
+                client.close()
+                return
+            
+            # Get existing blend_files or create new dict
+            blend_files = blend_doc.get("blend_files", {})
+            
+            # Remove old latest path if it exists and is different
+            old_latest_key = None
+            for key, value in blend_files.items():
+                if value == "latest" and key != latest_path:
+                    old_latest_key = key
+                    break
+
+            # Update blend_files dictionary
+            blend_files[version_path] = version_number
+            blend_files[latest_path] = "latest"
+            
+            # Remove old latest if found
+            if old_latest_key:
+                blend_files.pop(old_latest_key, None)
+                    
+            # Update the document with the complete blend_files object
+            update_data = {
+                "$set": {
+                    "blend_files": blend_files,
+                    "modified_time": datetime.now(timezone.utc),
+                }
+            }
+            
+            # Update the document
+            result = db["blends"].update_one(
+                {"_id": blend_doc["_id"]},
+                update_data
+            )
+            
+            if result.modified_count > 0:
+                print(f"✓ Database updated for blend '{blend_name}' - Version {version_number}")
+            else:
+                print(f"⚠ No changes made to database for blend '{blend_name}'")
+            
+            # Close connection
+            client.close()
+            
+        except ImportError as e:
+            print(f"Database update failed - missing library: {str(e)}")
+            print("Make sure pymongo is installed in Blender's Python environment")
+        except Exception as e:
+            print(f"Database update failed: {str(e)}")
+            import traceback
+            traceback.print_exc()
         

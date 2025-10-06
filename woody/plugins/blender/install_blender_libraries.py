@@ -9,7 +9,7 @@ def install_blender_libraries(blender_executable_path: str) -> bool:
         blender_path = Path(blender_executable_path)
         
         if sys.platform == "win32":
-            python_exe = blender_path / "4.2" / "python" / "bin" / "python.exe"  #TODO - make version dynamic
+            python_exe = blender_path / "4.2" / "python" / "bin" / "python.exe"  #TODO - make version dynamic -ie "4.2"
         else:
             python_exe = blender_path / "python" / "bin" / "python"  #TODO check Mac path
         
