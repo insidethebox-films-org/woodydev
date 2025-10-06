@@ -9,13 +9,15 @@ bl_info = {
 }
 
 import bpy 
-from .panel import *
+from .panel import VIEW3D_PT_context
+from .operators.version_up import WOODY_OT_version_up
 
 
 # =============== Registration ===============
 
 classes = [
-    VIEW3D_PT_context
+    VIEW3D_PT_context,
+    WOODY_OT_version_up
 ]
 
 

@@ -40,14 +40,15 @@ def create_blend_db(group_type, group_name, element_name, blend_name):
         print(f"Error: Invalid group_type '{group_type}'")
         return False
 
-    blend_path = blend.get_blend_path(group_type, group_name, element_name, blend_name)
+    blend_name_with_latest = f"{blend_name}_latest"
+    blend_path = blend.get_blend_path(group_type, group_name, element_name, blend_name_with_latest)
     collection_name = "blends"
     
     # Check if document with the same name already exists
     if db.connect[collection_name].find_one({"name": blend_name}):
         print(f"Document '{blend_name}' already exists in collection '{collection_name}'.")
         return False
-
+    
     try:
         # Create collection if it doesn't exist
         db.add_collection(collection_name)

@@ -10,6 +10,7 @@ from ..lib.mongodb import create_blend_db
 from ..plugins.blender.blender_instance import BlenderInstance
 
 import customtkinter
+import re
 import threading
 import time
 
@@ -55,25 +56,44 @@ class ProjectFrame:
 
 
     def _create_blend_file(self):
+        blend_name = self.blendNameEntry.get().strip()
+        # Validate blend name - prevent _latest and _v* patterns
+        if self._is_invalid_blend_name(blend_name):
+            print(
+                "Invalid Name", 
+                "Blend name cannot contain '_latest' or version suffixes like '_v1', '_v2', etc.\n"
+                "These suffixes are reserved for the versioning system."
+            )
+            return
+        
+        # Append _latest to the blend name for file creation
+        blend_name_with_latest = f"{blend_name}_latest"
         group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
         
         # Try to create the database entry first
-        if create_blend_db(group_type, self.groupsNameComboBox.get(), self.elementNameEntry.get(), self.blendNameEntry.get()):
+        if create_blend_db(group_type, self.groupsNameComboBox.get(), self.elementNameEntry.get(), blend_name):
             # Only create the file if database entry was successful
             success = self.blender.create_file(
                 group_type,
                 self.groupsNameComboBox.get(),
                 self.elementNameEntry.get(),
-                self.blendNameEntry.get()
+                blend_name_with_latest
             )
             
             if success:
-                print("Blend file created successfully!")
+                print(f"Blend file created successfully: {blend_name_with_latest}")
             else:
                 print("Failed to create blend file")
         else:
             print("Failed to create database entry - blend file not created")
        
+    def _is_invalid_blend_name(self, name: str) -> bool:
+        """Check if blend name contains reserved suffixes"""
+        if "_latest" in name:
+            return True
+        if re.search(r"_v\d+", name):
+            return True
+        return False
 
     def _open_blend_file(self):
         group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
