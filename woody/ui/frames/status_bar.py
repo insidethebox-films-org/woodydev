@@ -11,7 +11,7 @@ class StatusBarFrame:
             self.parent,
             corner_radius=8,        
             border_width=2,          
-            border_color="green",
+            border_color="#72a343",
             height=30
             )
         self.frame.grid_columnconfigure(0, weight=1)
