@@ -1,3 +1,5 @@
+from ..widgets import CTkListbox
+
 import customtkinter as ctk
 
 class AssetBrowserFrame:
@@ -17,9 +19,20 @@ class AssetBrowserFrame:
     
     def create_widgets(self):
     
-        test_label = ctk.CTkLabel(
+        listbox = CTkListbox(
             self.frame,
-            text="Asset Browser",
-            font=("Arial", 16)
-        )
-        test_label.grid(row=0, column=0, pady=20)
+            highlight_color="#86753d",
+            hover_color="#5a5a5a",
+            border_width=2
+            )
+        listbox.pack(fill="both", expand=True, padx=5, pady=5)
+
+        listbox.insert(0, "Option 0")
+        listbox.insert(1, "Option 1")
+        listbox.insert(2, "Option 2")
+        listbox.insert(3, "Option 3")
+        listbox.insert(4, "Option 4")
+        listbox.insert(5, "Option 5")
+        listbox.insert(6, "Option 6")
+        listbox.insert(7, "Option 7")
+        listbox.insert("END", "Option 8")
