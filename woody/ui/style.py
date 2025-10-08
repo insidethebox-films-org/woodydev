@@ -35,3 +35,9 @@ BUTTON_STYLE = {
     "corner_radius": 5,
     "font": FONTS["body"]
 }
+
+INPUT_DIALOG_STYLE = {
+    "button_fg_color": COLORS["foreground"],
+    "button_hover_color": COLORS["hover"],
+    "button_text_color": COLORS["text"]
+}

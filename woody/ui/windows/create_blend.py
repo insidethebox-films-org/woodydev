@@ -1,37 +1,48 @@
-from . import style
+from .. import style
 
-from ..lib.folder import create_element_fd
-from ..lib.folder import create_group_sequence_fd
-from ..lib.mongodb import create_group_sequence_db
-from ..lib.mongodb import create_element_db
-from ..lib.mongodb import get_group_sequence_names
-from ..lib.mongodb import create_blend_db
+from ...lib.mongodb import get_group_sequence_names
+from ...lib.mongodb import create_blend_db
 
-from ..plugins.blender.blender_instance import BlenderInstance
+from ...plugins.blender.blender_instance import BlenderInstance
 
-import customtkinter
 import re
+import os
 import threading
 import time
+import customtkinter as ctk
 
-class ProjectFrame:
+class CreateBlendWindow:
     def __init__(self, parent):
-        self.parent = parent
-        self.create_frame()
-        self.create_widgets()
-
+        self.window = ctk.CTkToplevel(parent)
+        self.window.title("Create Blender Scene")
+        self.window.geometry("300x420")
+        
+        self.window.transient(parent) 
+        self.window.grab_set()
+        
         self.blender = BlenderInstance()
         
+        # Set icon
+        icon_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "icons",
+            "woodyIcon.ico"
+        )
+        self.window.iconbitmap(icon_path)
+        
         threading.Thread(target=self.refresh_groups_name_comboBox, daemon=True).start()
-            
-    def create_frame(self):
-        self.frame = customtkinter.CTkFrame(
-            self.parent,
-            corner_radius=10,        
-            border_width=2,          
-            border_color="#5c6935"
-            )
+        
+        # Frame
+        self.frame = ctk.CTkFrame(
+            self.window,
+            corner_radius=10,
+            border_width=2,
+            border_color="#e97824"
+        )
+        self.frame.pack(expand=True, fill="both", padx=10, pady=10)
         self.frame.grid_columnconfigure(0, weight=1)
+        
+        self.create_widgets()
         
     def refresh_groups_name_comboBox(self):
         while True:
@@ -44,17 +55,10 @@ class ProjectFrame:
                     if current in new_values:
                         self.groupsNameComboBox.set(current)
                 
-                time.sleep(2)
+                time.sleep(1)
             except:
-                time.sleep(2)
-    
-    def create_element(self):
-        create_group_sequence_fd(self.groupTypeComboBox.get(), self.groupsNameComboBox.get())
-        create_group_sequence_db(self.groupTypeComboBox.get(), self.groupsNameComboBox.get())
-        create_element_db(self.groupTypeComboBox.get(), self.groupsNameComboBox.get(), self.elementNameEntry.get())
-        create_element_fd(self.groupTypeComboBox.get(), self.groupsNameComboBox.get(), self.elementNameEntry.get())
-
-
+                time.sleep(1)
+        
     def _create_blend_file(self):
         blend_name = self.blendNameEntry.get().strip()
         # Validate blend name - prevent _latest and _v* patterns
@@ -103,29 +107,23 @@ class ProjectFrame:
             self.elementNameEntry.get(),
             self.blendNameEntry.get()
         )
-
-    def _dev_update(self):
-        if self.blender.dev_update():
-            print("Dev Update Complete", "Addon zip has been recreated successfully!")
-        else:
-            print("Dev Update Failed", "Failed to recreate addon zip. Check the console for details.")
-    
-    def create_widgets(self):        
+        
+    def create_widgets(self):
         
         # Project label
-        self.projectLabel = customtkinter.CTkLabel(
+        self.projectLabel = ctk.CTkLabel(
             self.frame, 
-            text="Project",
+            text="Create Blender Scene",
             **style.HEADER_LABEL
 
         )
         self.projectLabel.grid(row= 0, column=0, sticky="nw", padx=8, pady=(8, 0))  
         
-        separator = customtkinter.CTkFrame(self.frame, height=2, fg_color="#414141")
+        separator = ctk.CTkFrame(self.frame, height=2, fg_color="#414141")
         separator.grid(row=1, column=0, sticky="ew", padx=5, pady=(2, 8), columnspan=2) 
-
-        # Group type label
-        self.groupTypeLabel = customtkinter.CTkLabel(
+        
+                # Group type label
+        self.groupTypeLabel = ctk.CTkLabel(
             self.frame, 
             text="Group Type",
             **style.BODY_LABEL
@@ -138,7 +136,7 @@ class ProjectFrame:
             "Shots Sequence"
         ]
         
-        self.groupTypeComboBox = customtkinter.CTkComboBox(
+        self.groupTypeComboBox = ctk.CTkComboBox(
             self.frame,
             values=groupTypeValues,
             height=25,
@@ -148,7 +146,7 @@ class ProjectFrame:
         self.groupTypeComboBox.grid(row=3, column=0, sticky="new", padx=8)
         
         # Group name label
-        self.groupNameLabel = customtkinter.CTkLabel(
+        self.groupNameLabel = ctk.CTkLabel(
             self.frame, 
             text="Group Name",
             **style.BODY_LABEL
@@ -156,7 +154,7 @@ class ProjectFrame:
         self.groupNameLabel.grid(row=4, column=0, sticky="nw", padx=8)
         
         # Group name combobox
-        self.groupsNameComboBox = customtkinter.CTkComboBox(
+        self.groupsNameComboBox = ctk.CTkComboBox(
             self.frame,
             values=get_group_sequence_names(self.groupTypeComboBox.get()),
             height=25
@@ -165,7 +163,7 @@ class ProjectFrame:
         self.groupsNameComboBox.grid(row=5, column=0, sticky="new", padx=8)
         
         # Element name label
-        self.groupNameLabel = customtkinter.CTkLabel(
+        self.groupNameLabel = ctk.CTkLabel(
             self.frame, 
             text="Element Name",
             **style.BODY_LABEL
@@ -173,60 +171,43 @@ class ProjectFrame:
         self.groupNameLabel.grid(row=6, column=0, sticky="nw", padx=8)
         
         # Element Name
-        self.elementNameEntry = customtkinter.CTkEntry(
+        self.elementNameEntry = ctk.CTkEntry(
             self.frame,
             height=25    
         )
         self.elementNameEntry.grid(row=7, column=0, sticky="new", padx=8)
-        
-        # Create Element
-        self.createGroupButton = customtkinter.CTkButton(
-            self.frame,
-            text="Create Element",
-            **style.BUTTON_STYLE,
-            
-            command=self.create_element
-        )
-        self.createGroupButton.grid(row=8, sticky="nwe", padx=8, pady=8)
 
         # Blend name label
-        self.groupNameLabel = customtkinter.CTkLabel(
+        self.groupNameLabel = ctk.CTkLabel(
             self.frame, 
             text="Blend FileName",
             **style.BODY_LABEL
         )
-        self.groupNameLabel.grid(row=9, column=0, sticky="nw", padx=8)
+        self.groupNameLabel.grid(row=9, column=0, sticky="nw", padx=8, pady=3)
         
         # Blend Name
-        self.blendNameEntry = customtkinter.CTkEntry(
+        self.blendNameEntry = ctk.CTkEntry(
             self.frame,
             height=25    
         )
-        self.blendNameEntry.grid(row=10, column=0, sticky="new", padx=8)
+        self.blendNameEntry.grid(row=10, column=0, sticky="new", padx=8, pady=3)
 
         # Add Blender buttons
-        self.createBlendButton = customtkinter.CTkButton(
+        self.createBlendButton = ctk.CTkButton(
             self.frame,
             text="Create Blend File",
             **style.BUTTON_STYLE,
             command=self._create_blend_file
         )
-        self.createBlendButton.grid(row=11, sticky="nwe", padx=8, pady=(0,4))
+        self.createBlendButton.grid(row=11, sticky="nwe", padx=8, pady=3)
 
-        self.openBlendButton = customtkinter.CTkButton(
+        self.openBlendButton = ctk.CTkButton(
             self.frame,
             text="Open in Blender",
             **style.BUTTON_STYLE,
             command=self._open_blend_file
         )
-        self.openBlendButton.grid(row=12, sticky="nwe", padx=8, pady=(0,8))
+        self.openBlendButton.grid(row=12, sticky="nwe", padx=8, pady=3)
 
-        self.devUpdateButton = customtkinter.CTkButton(
-        self.frame,
-        text="Dev Update",
-        **style.BUTTON_STYLE,
-        command=self._dev_update
-        )
-        self.devUpdateButton.grid(row=13, sticky="nwe", padx=8, pady=(0,8))
-
-
+    def run(self):
+        self.window.wait_window()
