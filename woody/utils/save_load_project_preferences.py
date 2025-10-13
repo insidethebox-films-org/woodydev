@@ -1,20 +1,20 @@
 from pathlib import Path
 import json
 
-def save_project_preferences_json(project_name, blenderExecutable, projectDirectory):
+def save_project_preferences_json(project_name, blender_executable, project_directory):
     project_preferences_path = Path("prefs") / f"{project_name}_proj_prefs.json"
     project_preferences_path.parent.mkdir(parents=True, exist_ok=True)
     
     project_preferences = {
         "projectName": project_name,
-        "blenderExecutable": blenderExecutable,
-        "projectDirectory": projectDirectory
+        "blenderExecutable": blender_executable,
+        "projectDirectory": project_directory
     }
 
     with project_preferences_path.open("w", encoding="utf-8") as f:
         json.dump(project_preferences, f, indent=4, ensure_ascii=False)
     
-    return project_name  # Return project name for use in other functions
+    return project_name  # Return project name for use in other functions #TODO remove function
         
         
 def load_recent_project_preferences_json():
@@ -39,4 +39,4 @@ def load_recent_project_preferences_json():
         
     except Exception as e:
         print(f"Error loading project preferences: {e}")
-        return None
+        return None #TODO remove function

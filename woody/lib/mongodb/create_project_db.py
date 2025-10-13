@@ -1,28 +1,27 @@
-from ...tool import WoodyInstance
 from ...database.db_instance import DB_instance
 from ...database.templates.settings import settings_template
 
 import copy
 from datetime import datetime, timezone
 
-def create_project_db():
+def create_project_db(name, directory):
     
-    woody = WoodyInstance()
-    name = woody.projectName
-    directory = str(woody.projectDirectory)
+    # woody = WoodyInstance()
+    # name = woody.projectName
+    # directory = str(woody.projectDirectory)
 
     db = DB_instance(name)
 
     # Check if collection 'settings' already exists
     if "settings" in db.collections:
-        print(f"Collection 'settings' already exists in database '{db.name}'.")
+        print(f"Collection 'settings' already exists in database '{name}'.")
         return
     
     #Create 'settings' collection
     db.add_collection("settings")
     
     settings = copy.deepcopy(settings_template)
-    settings["project_name"] = db.name
+    settings["project_name"] = name
     settings["location"] = directory
     settings["created_time"] = datetime.now(timezone.utc)
     db.add_document("settings", settings)

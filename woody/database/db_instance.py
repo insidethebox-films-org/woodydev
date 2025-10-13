@@ -1,24 +1,38 @@
 from ..tool import WoodyInstance
+from ..utils.normalise_directory_path import normalise_directory_path
 
 from pymongo import MongoClient
+from pathlib import Path
 
 
 class DB_instance:
     def __init__(self, name=None):
         self.client = self.get_mongo_client()
-        self.name = name
-        self.connect = self.client[name] if name else None
+        self.name = self.get_project_name() if name is None else name
+        self.connect = self.client[self.name] if self.name else None
         self.collections = self.get_collections_from_db()  # Dictionary to store multiple collections
+        self.projectDirectory = Path(self.get_project_directory()) if self.get_project_directory() else None
         
     def get_mongo_client(self):
         woody = WoodyInstance()
         return MongoClient(woody.mongoDBAddress)
+
+    def get_project_name(self):
+        return WoodyInstance().projectName
     
     def get_collections_from_db(self):
         if self.connect is not None:
             return {name: self.connect[name] for name in self.connect.list_collection_names()}
         else:
             return {}
+        
+    def get_project_directory(self):
+        if self.connect is not None:
+            settings = self.connect['settings'].find_one({})
+            if settings and 'projectDirectory' in settings:
+                path_str = settings['projectDirectory']
+                return normalise_directory_path(path_str) #TODO gets normalized, check if its good.
+        return None
         
     def add_collection(self, collection_name):
         if self.connect is not None:
@@ -39,3 +53,5 @@ class DB_instance:
             return result.modified_count
         else:
             raise Exception(f"Collection '{collection_name}' not found")
+
+    

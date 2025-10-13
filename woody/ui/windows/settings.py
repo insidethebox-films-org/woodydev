@@ -41,11 +41,15 @@ class SettingsWindow:
     def load_settings(self):
         preferences = load_settings_json()
         self.mongoDBAddressEntry.insert(0, preferences.get("mongoDBAddress", ""))
+        self.blenderExecutableEntry.insert(1, preferences.get("blenderExecutable", ""))
     
     def save_settings(self):
         mongoDBAddress = self.mongoDBAddressEntry.get()
+        blenderExecutable = self.blenderExecutableEntry.get()
         
-        save_settings_json(mongoDBAddress)
+
+        print(f"Saving settings:\nMongoDB Address: {mongoDBAddress}\nBlender Executable: {blenderExecutable}")
+        save_settings_json(mongoDBAddress=mongoDBAddress, blenderExecutable=blenderExecutable)
         self.window.destroy()
     
     def _dev_update(self):
@@ -83,6 +87,21 @@ class SettingsWindow:
             self.frame,
         )
         self.mongoDBAddressEntry.grid(row=3, column=0, sticky="ew", padx=8)
+
+        # Blender executable label
+        self.blenderExecutableLabel = ctk.CTkLabel(
+            self.frame, 
+            text="Blender Executable",
+            **style.BODY_LABEL
+        )
+        self.blenderExecutableLabel.grid(row=4, column=0, sticky="nw", padx=8)
+
+        # Blender executable entry
+        self.blenderExecutableEntry = ctk.CTkEntry(
+            self.frame,
+            height=25
+            )
+        self.blenderExecutableEntry.grid(row=5, column=0, sticky="new", padx=8, columnspan=2)
         
         # Save settings button
         self.saveSettingsButton = ctk.CTkButton(
@@ -92,7 +111,7 @@ class SettingsWindow:
             
             command=self.save_settings
         )
-        self.saveSettingsButton.grid(row=4, column=0, sticky="nwe", padx=8, pady=8)
+        self.saveSettingsButton.grid(row=6, column=0, sticky="nwe", padx=8, pady=8)
         
         self.devUpdateButton = ctk.CTkButton(
             self.frame,
@@ -100,7 +119,7 @@ class SettingsWindow:
             **style.BUTTON_STYLE,
             command=self._dev_update
             )
-        self.devUpdateButton.grid(row=5, sticky="nwe", padx=8, pady=(0,8))
+        self.devUpdateButton.grid(row=7, sticky="nwe", padx=8, pady=(0,8))
     
     def run(self):
         self.window.wait_window()
