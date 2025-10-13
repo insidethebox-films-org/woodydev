@@ -8,9 +8,7 @@ from datetime import datetime, timezone
 
 def create_group_sequence_db(type, name):
 
-    woody = WoodyInstance()
-
-    db = DB_instance(woody.projectName)
+    db = DB_instance()
 
     if type == 'Assets Group':
         collection_name = "groups"

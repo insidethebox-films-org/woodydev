@@ -18,8 +18,7 @@ def create_blend_db(group_type, group_name, element_name, blend_name):
         bool: True if the blend document was created successfully, False otherwise.
     """
     
-    woody = WoodyInstance()
-    db = DB_instance(woody.projectName)
+    db = DB_instance()
     blend = BlenderInstance()
     
     # Find the element document to get its ID

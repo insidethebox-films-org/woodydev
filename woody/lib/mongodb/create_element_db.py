@@ -9,9 +9,7 @@ from datetime import datetime, timezone
 
 def create_element_db(groupTypeCombo, groupName, elementName):
 
-    woody = WoodyInstance()
-
-    db = DB_instance(woody.projectName)
+    db = DB_instance()
 
     if groupTypeCombo == 'Assets Group':
         collection_name = "assets"
@@ -46,7 +44,7 @@ def create_element_db(groupTypeCombo, groupName, elementName):
     print(f"Document '{elementName}' is set up in collection '{collection_name}'.")
 
     #Update the group or sequence document to include the new element
-    group_collection_name = group_type + "s" #groups or sequences
+    group_collection_name = group_type + "s" #groups or sequences #TODO Take a look at removing this
     query = {"name": groupName}
     attribute = collection_name
     update = {"$set": {f"{attribute}.{elementName}": template[id_type]}}

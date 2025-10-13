@@ -1,5 +1,6 @@
 from ..widgets import CTkListbox
-from ...lib.mongodb.get_group_sequence_names import get_group_sequence_names, get_elements_names
+from .header import HeaderFrame
+from ...lib.mongodb.get_groups_elements import get_group_sequence_names, get_elements_names
 
 import customtkinter as ctk
 
@@ -21,16 +22,17 @@ class AssetBrowserFrame:
         self.frame.grid_columnconfigure(2, weight=5)
         
         self.frame.grid_rowconfigure(0, weight=1)
-        
+
     def on_root_select(self, selected):
         self.current_group_type = selected
         self.group_list_box.delete(0, "END")
+
         groups = get_group_sequence_names(selected)
         
         for i, group in enumerate(groups):
             self.group_list_box.insert(i, group)
-        
         self.element_list_box.delete(0, "END")
+
             
     def on_group_select(self, selected):
         self.element_list_box.delete(0, "END")

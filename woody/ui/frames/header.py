@@ -1,4 +1,6 @@
-from ...lib.mongodb.get_projects_db import get_projects_db
+from ...tool.woody_instance import WoodyInstance
+from ...lib.mongodb.get_projects import get_projects_db
+from ...utils.save_load_settings import save_settings_json
 
 import os
 import customtkinter as ctk
@@ -9,7 +11,11 @@ class HeaderFrame:
         self.parent = parent
         self.create_frame()
         self.create_widgets()
-            
+
+    def set_project_name_settings(self, project_name):
+        # project_name contains the combobox selection
+        save_settings_json(projectName=project_name)   
+
     def create_frame(self):
         frames_height=50
         
@@ -69,11 +75,13 @@ class HeaderFrame:
         headerImage.grid(row=0, column=0, pady=(5, 2), padx=12, sticky="nsw")
         
         #Project picker combobox
-        self.groupsNameComboBox = ctk.CTkComboBox(
+        self.projectComboBox = ctk.CTkComboBox(
             self.project_picker_frame,
             values=get_projects_db(),
             height=25,
-            state="readonly"
+            state="readonly",
+
+            command=self.set_project_name_settings
         )
-        self.groupsNameComboBox.set("")
-        self.groupsNameComboBox.grid(row=0, column=0, sticky="we", padx=12)
+        self.projectComboBox.set(WoodyInstance().projectName)
+        self.projectComboBox.grid(row=0, column=0, sticky="we", padx=12)

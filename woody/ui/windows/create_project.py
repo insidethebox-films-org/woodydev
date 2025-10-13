@@ -1,5 +1,5 @@
 from .. import style
-from ...utils import save_project_preferences_json
+from ...utils import save_settings_json
 from ...lib.folder import create_project_fd
 from ...lib.mongodb import create_project_db
 from ...plugins.blender.install_blender_libraries import install_blender_libraries
@@ -39,15 +39,18 @@ class CreateProjectWindow:
         
     def create_project(self):
         # Save project preferences and get project name
-        project_name = save_project_preferences_json(
-            self.projectNameEntry.get(),
-            self.blenderExecutableEntry.get(), 
-            self.projectDirectoryEntry.get()
-        )
+        # project_name = save_settings_json(
+        #     project_name=self.projectNameEntry.get(),
+        #     project_directory=self.projectDirectoryEntry.get(),
+        # )
+        project_name=self.projectNameEntry.get().strip()
+        project_directory=self.projectDirectoryEntry.get().strip()
         
         # Create project folders and database
-        create_project_fd()
-        create_project_db()
+        print("Project name:", project_name)
+        print("Project directory:", project_directory) #TODO creates folders in wrong location
+        create_project_db(project_name, project_directory)
+        create_project_fd(project_name, project_directory)
 
         # Install Blender libraries
         blender_executable_path = self.blenderExecutableEntry.get().strip()
@@ -59,9 +62,9 @@ class CreateProjectWindow:
                 print("Warning: Library installation failed")
         
         # Copy prefs to addon
-        copy_prefs_to_addon()
+        copy_prefs_to_addon()  #TODO remove
         
-        print(f"Project '{project_name}' created successfully!")
+        print(f"Project '{self.projectNameEntry.get()}' created successfully!")
         self.window.destroy()
     
     def create_widgets(self):
