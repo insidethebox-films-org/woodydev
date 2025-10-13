@@ -1,6 +1,4 @@
 from ..tool import WoodyInstance
-from ..utils.normalise_directory_path import normalise_directory_path
-
 from pymongo import MongoClient
 from pathlib import Path
 
@@ -29,9 +27,9 @@ class DB_instance:
     def get_project_directory(self):
         if self.connect is not None:
             settings = self.connect['settings'].find_one({})
-            if settings and 'projectDirectory' in settings:
-                path_str = settings['projectDirectory']
-                return normalise_directory_path(path_str) #TODO gets normalized, check if its good.
+            if settings and 'location' in settings:
+                path_str = settings['location']
+                return path_str
         return None
         
     def add_collection(self, collection_name):
