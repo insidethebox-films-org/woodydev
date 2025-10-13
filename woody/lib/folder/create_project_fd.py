@@ -1,5 +1,5 @@
 from pathlib import Path
-from .folder_instance import FolderInstance
+from .directory_instance import DirectoryInstance
 
 def create_project_fd(project_name, base_path):
 
@@ -16,4 +16,4 @@ def create_project_fd(project_name, base_path):
         # For regular paths, use Path object
         project_root = Path(base_path) / project_name
     
-    FolderInstance(project_root, folders).create_folders_subfolders()
+    DirectoryInstance(project_root, folders).create_folders_subfolders()

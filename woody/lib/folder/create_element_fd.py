@@ -1,4 +1,4 @@
-from .folder_instance import FolderInstance
+from .directory_instance import DirectoryInstance
 from ...tool import WoodyInstance
 from ...database.db_instance import DB_instance
 
@@ -15,6 +15,6 @@ def create_element_fd(groupTypeCombo, groupName, elementName):
        elementName: [],
     }
     
-    FolderInstance(base_path, folders).create_folders_subfolders()
+    DirectoryInstance(base_path, folders).create_folders_subfolders()
     
     

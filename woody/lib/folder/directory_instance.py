@@ -4,7 +4,7 @@ import os
 import subprocess
 from pathlib import Path
 
-class FolderInstance():
+class DirectoryInstance():
     """
     A utility class for creating and managing folder structures on local and network drives.
     
@@ -93,7 +93,6 @@ class FolderInstance():
                 print(f"Mount verification failed: {mount}")
                 return None
         
-        # For non-SMB paths, return the original path
         return path.replace("\\", "/")
 
     def create_folders_subfolders(self):

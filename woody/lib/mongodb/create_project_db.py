@@ -1,6 +1,6 @@
 from ...database.db_instance import DB_instance
 from ...database.templates.settings import settings_template
-from ...lib.folder.folder_instance import FolderInstance
+from ..folder.directory_instance import DirectoryInstance
 
 import copy
 from datetime import datetime, timezone
@@ -12,7 +12,7 @@ def create_project_db(name, directory):
     # directory = str(woody.projectDirectory
     
     db = DB_instance(name)
-    directory = FolderInstance(directory).normalised
+    directory = DirectoryInstance(directory).normalised
 
     # Check if collection 'settings' already exists
     if "settings" in db.collections:
