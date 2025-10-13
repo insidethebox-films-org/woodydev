@@ -2,11 +2,7 @@ from pathlib import Path
 from .folder_instance import FolderInstance
 
 def create_project_fd(project_name, base_path):
-    
-    # woody = WoodyInstance()
-    # project_name = woody.projectName
-    # base_path = woody.projectDirectory
-    
+
     folders = {
         "assets": [],
         "shots": [],
@@ -20,5 +16,4 @@ def create_project_fd(project_name, base_path):
         # For regular paths, use Path object
         project_root = Path(base_path) / project_name
     
-    print(f"******** Creating project folder at: {project_root}")
     FolderInstance(project_root, folders).create_folders_subfolders()

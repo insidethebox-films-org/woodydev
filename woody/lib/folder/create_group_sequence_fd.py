@@ -14,7 +14,6 @@ def create_group_sequence_fd(type, folder_name):
     folders = {
        folder_name: [],
     }
-    print(base_path)
     FolderInstance(base_path, folders).create_folders_subfolders()
     
     
