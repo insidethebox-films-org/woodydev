@@ -39,9 +39,8 @@ class FolderInstance():
             result = f"//{parsed.netloc}{parsed.path}"
             return result
         
-        # Handle both \\ and // UNC paths
         if path.startswith('\\\\') or path.startswith('//'):
-            # Convert all backslashes to forward slashes and ensure it starts with //
+            # Convert all backslashes to forward slashes
             normalized = path.replace('\\', '/')
             if not normalized.startswith('//'):
                 normalized = '//' + normalized.lstrip('/')
@@ -51,14 +50,10 @@ class FolderInstance():
 
     def mount_drive(self, path):
         
-        normalised = self.normalise_path(path)  # Fixed typo: was "pa ath"
+        normalised = self.normalise_path(path)
         current_os = platform.system()
 
-        print(f"Normalized path: {normalised}")
-        print(f"Operating system: {current_os}")
-
         if normalised.startswith('//') and current_os == 'Darwin':
-            print("Detected SMB path on macOS - attempting to mount")
         
             parts = normalised[2:].split('/', 2)
             if len(parts) < 2:
@@ -68,12 +63,8 @@ class FolderInstance():
             server = parts[0]
             share = parts[1]
             
-            print(f"Server: {server}, Share: {share}")
-            
             # Mount point
             mount = f"/Volumes/{share}"
-            
-            print(f"Checking if {mount} is already mounted...")
             
             if not os.path.ismount(mount):
                 smb_url = f"smb://{server}/{share}"
@@ -89,29 +80,20 @@ class FolderInstance():
                 if result.returncode != 0:
                     print(f"Warning: Could not mount {smb_url}: {result.stderr}")
                     return None
-                else:
-                    print(f"Successfully mounted {smb_url}")
-            else:
-                print(f"{mount} is already mounted")
 
             # Verify mount
             if os.path.ismount(mount):
-                print(f"Mount verified: {mount}")
-                # Return the mount with subdirectory
                 if len(parts) >= 3:
                     subdirectory = parts[2]
                     full_path = os.path.join(mount, subdirectory)
-                    print(f"Full mount path: {full_path}")
                     return full_path
                 else:
-                    print(f"Using base mount: {mount}")
                     return mount
             else:
                 print(f"Mount verification failed: {mount}")
                 return None
         
         # For non-SMB paths, return the original path
-        print(f"Non-SMB path or not macOS, returning: {path}")
         return path.replace("\\", "/")
 
     def create_folders_subfolders(self):
@@ -121,8 +103,6 @@ class FolderInstance():
         if base_path is None:
             print("Error: Could not mount the drive. Cannot create directories.")
             return
-        
-        print(f"Using base path: {base_path}")
         
         # Use the mounted local path for directory creation
         for main_folder, subfolders in self.folders.items():
