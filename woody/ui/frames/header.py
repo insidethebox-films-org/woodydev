@@ -6,15 +6,39 @@ import os
 import customtkinter as ctk
 from PIL import Image
 
+
 class HeaderFrame:
     def __init__(self, parent):
         self.parent = parent
         self.create_frame()
         self.create_widgets()
-
+        self.refresh_projects_list()
+    
+    def refresh_projects_list(self):
+        try:
+            updated_projects = get_projects_db()
+            
+            # Fix: Check for the correct ComboBox name
+            if hasattr(self, 'projectComboBox'):
+                current_value = self.projectComboBox.get()
+                self.projectComboBox.configure(values=updated_projects)
+                
+                if current_value in updated_projects:
+                    self.projectComboBox.set(current_value)
+                elif updated_projects: 
+                    self.projectComboBox.set(updated_projects[0])
+            else:
+                print("projectComboBox not found!")  # Debug line
+                    
+        except Exception as e:
+            print(f"Error refreshing projects: {e}")
+        
+        # Schedule next refresh in 5 seconds
+        self.parent.after(5000, self.refresh_projects_list)
+        
     def set_project_name_settings(self, project_name):
-        # project_name contains the combobox selection
-        save_settings_json(projectName=project_name)   
+        save_settings_json(projectName=project_name)
+        
 
     def create_frame(self):
         frames_height=50
@@ -80,7 +104,6 @@ class HeaderFrame:
             values=get_projects_db(),
             height=25,
             state="readonly",
-
             command=self.set_project_name_settings
         )
         self.projectComboBox.set(WoodyInstance().projectName)
