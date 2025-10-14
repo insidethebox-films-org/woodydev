@@ -10,6 +10,7 @@ bl_info = {
 
 import bpy 
 from .panel import VIEW3D_PT_context
+from .preferences import WoodyAddonPreferences
 from .operators.version_up import WOODY_OT_version_up
 
 
@@ -17,7 +18,8 @@ from .operators.version_up import WOODY_OT_version_up
 
 classes = [
     VIEW3D_PT_context,
-    WOODY_OT_version_up
+    WOODY_OT_version_up,
+    WoodyAddonPreferences
 ]
 
 

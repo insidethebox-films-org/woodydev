@@ -1,11 +1,13 @@
 import os
 
-from ...tool import WoodyInstance
+from ...tool.woody_instance import WoodyInstance
+from ...database.db_instance import DB_instance
 from .operations import *
 
 class BlenderInstance:
     def __init__(self):
         self.woody = WoodyInstance()
+        self.db = DB_instance()
         self.executable = set_executable_path(self.woody.blenderExecutable)
 
         self.addon_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../woody_blender_addon"))  #TODO hardcoded path
@@ -18,7 +20,7 @@ class BlenderInstance:
             return False
 
         blend_path = get_blend_path(
-            str(self.woody.projectDirectory),
+            str(self.db.projectDirectory),
             str(self.woody.projectName),
             group_type,
             group_name,
@@ -35,7 +37,7 @@ class BlenderInstance:
             return False
         
         blend_path = get_blend_path(
-            str(self.woody.projectDirectory),
+            str(self.db.projectDirectory),
             str(self.woody.projectName),
             group_type,
             group_name,
@@ -52,7 +54,7 @@ class BlenderInstance:
     def get_blend_path(self, group_type: str, group_name: str, element_name: str, blend_name: str) -> str:
         """Gets the blend file path for given parameters"""
         return get_blend_path(
-            str(self.woody.projectDirectory),
+            str(self.db.projectDirectory),
             str(self.woody.projectName),
             group_type,
             group_name,

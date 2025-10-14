@@ -4,9 +4,10 @@ import time
 
 from pathlib import Path
 from .get_zip_hash import get_zip_hash
+from ....tool.woody_instance import WoodyInstance
 
 def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
-    """Opens existing blend file with addon update check
+    """Opens existing blend file with addon update check and sets preferences
     
     Args:
         executable (str): Path to Blender executable
@@ -17,6 +18,15 @@ def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
         bool: True if blend file was opened successfully
     """
     try:
+        # Get current MongoDB address from Woody
+        woody_instance = WoodyInstance()
+        mongo_address = woody_instance.mongoDBAddress or ""
+        project_name = woody_instance.projectName or ""
+        
+        print(f"Setting Blender addon preferences:")
+        print(f"  MongoDB Address: {mongo_address}")
+        print(f"  Project Name: {project_name}")
+        
         blend_dir = os.path.dirname(blend_path)
         
         # Convert to Path object to handle network paths better
@@ -28,7 +38,7 @@ def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
         # Create startup script in same directory as blend file
         startup_path = blend_dir_path / "_startup.py"
 
-        # Create startup script
+        # Create startup script (now includes preference setting)
         startup_script = f"""
 import bpy
 import addon_utils
@@ -70,6 +80,19 @@ if current_hash != stored_hash:
         json.dump({{'hash': current_hash}}, f)
 else:
     print(f"Addon {{addon_name}} is up to date")
+
+# Set the Woody addon preferences
+try:
+    addon_prefs = bpy.context.preferences.addons["woody_blender_addon"].preferences
+    addon_prefs.mongodb_address = "{mongo_address}"
+    addon_prefs.project_name = "{project_name}"
+    
+    print("SUCCESS: Woody addon preferences set successfully")
+    print(f"  MongoDB Address: {{addon_prefs.mongodb_address}}")
+    print(f"  Project Name: {{addon_prefs.project_name}}")
+    
+except Exception as e:
+    print(f" Error setting preferences: {{e}}")
 
 # Save preferences
 bpy.ops.wm.save_userpref()

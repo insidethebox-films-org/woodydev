@@ -56,7 +56,7 @@ def create_blend_db(group_type, group_name, element_name, blend_name):
         template = copy.deepcopy(blend_template)
         template["name"] = blend_name
         template["element_id"] = element_id
-        template["blend_files"] = {blend_path: 1}
+        template["blend_files"] = {blend_path: "latest"}
         template["created_time"] = datetime.now(timezone.utc)  
         template["modified_time"] = datetime.now(timezone.utc)
         
