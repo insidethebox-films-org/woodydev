@@ -2,10 +2,9 @@ import bpy
 import os
 import re
 import shutil
-import sys
-from pathlib import Path
 
-from ..prefs.load_woody_prefs import load_woody_preferences
+from pathlib import Path
+from ..utils.get_db_connection import get_database_connection
 
 class WOODY_OT_version_up(bpy.types.Operator):
     bl_idname = "woody.version_up"
@@ -82,37 +81,42 @@ class WOODY_OT_version_up(bpy.types.Operator):
     def update_database(self, blend_name: str, version_path: str, latest_path: str, version_number: int):
         """Update database with new version information"""
         try:
-            # Import required libraries (now available thanks to install_blender_libraries)
-            from pymongo import MongoClient
             from datetime import datetime, timezone
             
-            # Load preferences directly from JSON
-            prefs = load_woody_preferences()
-            if not prefs:
-                print("Could not load woody preferences")
+            # Get database connection using the utility function
+            client, db, error = get_database_connection()
+            
+            if error:
+                print(f"Database connection failed: {error}")
+                self.report({'WARNING'}, f"Database update failed: {error}")
                 return
             
-            # Get database connection info
-            mongo_url = prefs.get("mongoDBAddress")
-            project_name = prefs.get("projectName")
-            
-            if not mongo_url or not project_name:
-                print("Warning: MongoDB address or project name not found in preferences")
+            if client is None or db is None:
+                print("Could not establish database connection")
+                self.report({'WARNING'}, "Could not connect to database")
                 return
             
-            print(f"Connecting to database: {project_name} at {mongo_url}")
+            # Get addon preferences for logging
+            addon_prefs = bpy.context.preferences.addons["woody_blender_addon"].preferences
+            print(f"Connecting to database: {addon_prefs.project_name} at {addon_prefs.mongodb_address}")
             
-            # Connect to MongoDB
-            client = MongoClient(mongo_url)
-            db = client[project_name]
-            
-            # Find the blend document
-            blend_doc = db["blends"].find_one({"name": blend_name})
+            # Find the blend document - try both base name and with _latest suffix
+            collection = db["blends"]
+            blend_doc = collection.find_one({"name": blend_name})
             
             if not blend_doc:
-                print(f"Warning: Blend document '{blend_name}' not found in database")
+                # Try with _latest suffix (for existing documents)
+                blend_name_with_latest = f"{blend_name}_latest"
+                blend_doc = collection.find_one({"name": blend_name_with_latest})
+                print(f"DEBUG - Tried searching with: '{blend_name_with_latest}'")
+            
+            if not blend_doc:
+                print(f"Warning: Blend document '{blend_name}' or '{blend_name}_latest' not found in database")
+                print("Skipping database update - blend document must be created through the main Woody application first")
                 client.close()
                 return
+            
+            print(f"✓ Found blend document: {blend_doc.get('name')}")
             
             # Get existing blend_files or create new dict
             blend_files = blend_doc.get("blend_files", {})
@@ -124,6 +128,9 @@ class WOODY_OT_version_up(bpy.types.Operator):
                     old_latest_key = key
                     break
 
+            if old_latest_key:
+                print(f"DEBUG - Removing old latest key: {old_latest_key}")
+
             # Update blend_files dictionary
             blend_files[version_path] = version_number
             blend_files[latest_path] = "latest"
@@ -132,33 +139,48 @@ class WOODY_OT_version_up(bpy.types.Operator):
             if old_latest_key:
                 blend_files.pop(old_latest_key, None)
                     
+            print(f"DEBUG - Updating blend_files with: {len(blend_files)} entries")
+            
             # Update the document with the complete blend_files object
             update_data = {
                 "$set": {
                     "blend_files": blend_files,
                     "modified_time": datetime.now(timezone.utc),
+                    "latest_version": version_number
                 }
             }
             
             # Update the document
-            result = db["blends"].update_one(
+            result = collection.update_one(
                 {"_id": blend_doc["_id"]},
                 update_data
             )
             
             if result.modified_count > 0:
-                print(f"✓ Database updated for blend '{blend_name}' - Version {version_number}")
+                print(f"✓ Database updated successfully for blend '{blend_doc.get('name')}' - Version {version_number}")
+                print(f"  - Added version: {version_path} = {version_number}")
+                print(f"  - Updated latest: {latest_path} = 'latest'")
+                if old_latest_key:
+                    print(f"  - Removed old latest: {old_latest_key}")
+                
+                self.report({'INFO'}, f"Database updated - Version {version_number}")
             else:
-                print(f"⚠ No changes made to database for blend '{blend_name}'")
+                print(f"⚠ No changes made to database for blend '{blend_doc.get('name')}'")
+                self.report({'WARNING'}, "No database changes made")
             
             # Close connection
             client.close()
+            print("✓ Database connection closed")
             
         except ImportError as e:
-            print(f"Database update failed - missing library: {str(e)}")
+            error_msg = f"Database update failed - missing library: {str(e)}"
+            print(error_msg)
             print("Make sure pymongo is installed in Blender's Python environment")
+            self.report({'ERROR'}, "Missing required libraries")
         except Exception as e:
-            print(f"Database update failed: {str(e)}")
+            error_msg = f"Database update failed: {str(e)}"
+            print(error_msg)
             import traceback
             traceback.print_exc()
+            self.report({'ERROR'}, f"Database error: {str(e)}")
         
