@@ -1,27 +1,31 @@
-from urllib.parse import urlparse
-import platform
-import os
-import subprocess
+from .operations import create_folders_subfolders
+from .operations import mount_drive
+from .operations import normalise_path
+
 from pathlib import Path
 
 class DirectoryInstance():
     """
-    A utility class for creating and managing folder structures on local and network drives.
-    
-    Handles cross-platform directory creation with support for SMB network shares on macOS.
-    Automatically mounts SMB drives when needed and creates nested folder structures.
+    This class abstracts the process of:
+      - Normalizing paths across platforms.
+      - Mounting remote SMB network drives on macOS.
+      - Creating nested folder structures on a mounted or local path.
+
+    Attributes
+    ----------
+    path : str
+        The original input path provided during initialization.
+    normalised : str
+        The normalized version of the path (with consistent separators and SMB handling).
+    mount : str or None
+        The mounted drive path if applicable, otherwise the normalized local path.
+    folders : dict or None
+        A dictionary defining the folder structure to create, where keys are folder names
+        and values can be lists or nested dicts of subfolders.
     """
-    
+
     def __init__(self, path, folders=None):
-        """
-        Initialize a FolderInstance for directory operations.
-        
-        Attributes:
-            path (str): The original path converted to string format
-            normalised (str): Path normalized for the current platform (e.g., UNC format)
-            mount (str): Local mount point for network drives, or original path for local drives
-            folders (dict): The folder structure to be created
-        """
+
         if isinstance(path, Path):
             self.path = str(path)
         else:
@@ -32,105 +36,15 @@ class DirectoryInstance():
         self.folders = folders
 
     def normalise_path(self, path):
-        path = str(path)
-        
-        if path.startswith("smb://"):
-            parsed = urlparse(path)
-            result = f"//{parsed.netloc}{parsed.path}"
-            return result
-        
-        if path.startswith('\\\\') or path.startswith('//'):
-            # Convert all backslashes to forward slashes
-            normalized = path.replace('\\', '/')
-            if not normalized.startswith('//'):
-                normalized = '//' + normalized.lstrip('/')
-            return normalized
-        
-        return path
+
+        return normalise_path(path)
 
     def mount_drive(self, path):
         
         normalised = self.normalise_path(path)
-        current_os = platform.system()
-
-        if normalised.startswith('//') and current_os == 'Darwin':
         
-            parts = normalised[2:].split('/', 2)
-            if len(parts) < 2:
-                print(f"{normalised}: is not a valid smb path")
-                return None
-                
-            server = parts[0]
-            share = parts[1]
-            
-            # Mount point
-            mount = f"/Volumes/{share}"
-            
-            if not os.path.ismount(mount):
-                smb_url = f"smb://{server}/{share}"
-                print(f"Mounting {smb_url} to {mount}...")
-
-                result = subprocess.run(
-                    ['osascript', '-e', 
-                        f'mount volume "{smb_url}"'],
-                    capture_output=True,
-                    text=True,
-                    timeout=30
-                )
-                if result.returncode != 0:
-                    print(f"Warning: Could not mount {smb_url}: {result.stderr}")
-                    return None
-
-            # Verify mount
-            if os.path.ismount(mount):
-                if len(parts) >= 3:
-                    subdirectory = parts[2]
-                    full_path = os.path.join(mount, subdirectory)
-                    return full_path
-                else:
-                    return mount
-            else:
-                print(f"Mount verification failed: {mount}")
-                return None
-        
-        return path.replace("\\", "/")
+        return mount_drive(path, normalised)
 
     def create_folders_subfolders(self):
-        # Use the mounted path instead of the normalized path
-        base_path = self.mount
-        
-        if base_path is None:
-            print("Error: Could not mount the drive. Cannot create directories.")
-            return
-        
-        # Use the mounted local path for directory creation
-        for main_folder, subfolders in self.folders.items():
-            main_path = os.path.join(base_path, main_folder)
-            try:
-                print(f"Creating directory: {main_path}")
-                os.makedirs(main_path, exist_ok=True)
-                print(f"SUCCESS: Created {main_path}")
-            except OSError as e:
-                print(f"Could not create directory {main_path}: {e}")
-                continue
 
-            if isinstance(subfolders, dict):
-                # For nested dictionaries, recursively create subdirectories
-                for subfolder_name, nested_content in subfolders.items():
-                    subfolder_path = os.path.join(main_path, subfolder_name)
-                    try:
-                        print(f"Creating directory: {subfolder_path}")
-                        os.makedirs(subfolder_path, exist_ok=True)
-                        print(f"SUCCESS: Created {subfolder_path}")
-                    except OSError as e:
-                        print(f"Could not create directory {subfolder_path}: {e}")
-                        
-            elif isinstance(subfolders, list): 
-                for subfolder in subfolders:
-                    subfolder_path = os.path.join(main_path, subfolder)
-                    try:
-                        print(f"Creating directory: {subfolder_path}")
-                        os.makedirs(subfolder_path, exist_ok=True)
-                        print(f"SUCCESS: Created {subfolder_path}")
-                    except OSError as e:
-                        print(f"Could not create directory {subfolder_path}: {e}")
+        create_folders_subfolders(self.mount, self.folders)
