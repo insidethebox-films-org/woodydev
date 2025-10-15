@@ -1,11 +1,11 @@
 from ...tool import WoodyInstance
 from ...database.db_instance import DB_instance
 
-woody = WoodyInstance()
-db = DB_instance()
-db = db.connect
-
 def get_group_sequence_names(groupType):
+    woody = WoodyInstance()
+    db = DB_instance(woody.projectName)
+    db = db.connect
+    
     if groupType == "Assets Group":
         collection = db["groups"]
     else:
@@ -15,6 +15,10 @@ def get_group_sequence_names(groupType):
     return [doc["name"] for doc in cursor]
 
 def get_elements_names(group_name):
+    woody = WoodyInstance()
+    db = DB_instance(woody.projectName)
+    db = db.connect
+    
     if db["groups"].find_one({"name": group_name}):
         collection = db["assets"]
         query = {"group": group_name}

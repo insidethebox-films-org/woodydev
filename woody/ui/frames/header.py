@@ -1,8 +1,10 @@
 from ...tool.woody_instance import WoodyInstance
+from ...tool.event_bus import event_bus
 from ...lib.mongodb.get_projects import get_projects_db
 from ...utils.save_load_settings import save_settings_json
 
 import os
+
 import customtkinter as ctk
 from PIL import Image
 
@@ -36,9 +38,11 @@ class HeaderFrame:
         # Schedule next refresh in 5 seconds
         self.parent.after(5000, self.refresh_projects_list)
         
-    def set_project_name_settings(self, project_name):
+    
+    def set_project_name(self, project_name):
         save_settings_json(projectName=project_name)
         
+        event_bus.publish('project_selection_changed', project_name)
 
     def create_frame(self):
         frames_height=50
@@ -59,6 +63,7 @@ class HeaderFrame:
             corner_radius=10,        
             border_width=2,          
             border_color="#b59630",
+            fg_color="#222222",
             height=frames_height
         )
         self.logo_frame.grid_columnconfigure(0, weight=1)
@@ -72,6 +77,7 @@ class HeaderFrame:
             corner_radius=10,        
             border_width=2,          
             border_color="#77563c",
+            fg_color="#222222",
             height=frames_height
         )
         self.project_picker_frame.grid_columnconfigure(0, weight=1)
@@ -104,7 +110,7 @@ class HeaderFrame:
             values=get_projects_db(),
             height=25,
             state="readonly",
-            command=self.set_project_name_settings
+            command=self.set_project_name
         )
         self.projectComboBox.set(WoodyInstance().projectName)
         self.projectComboBox.grid(row=0, column=0, sticky="we", padx=12)

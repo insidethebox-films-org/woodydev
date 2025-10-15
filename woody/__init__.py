@@ -25,8 +25,8 @@ class WoodyApp:
 
         self.mainWindow.grid_columnconfigure(0, weight=0)
         self.mainWindow.grid_columnconfigure(1, weight=1)
-        self.mainWindow.grid_columnconfigure(2, weight=2)
-        self.mainWindow.grid_columnconfigure(3, weight=2)
+        self.mainWindow.grid_columnconfigure(2, weight=3)
+        self.mainWindow.grid_columnconfigure(3, weight=3)
         
         # Header
         self.header_frame = HeaderFrame(self.mainWindow)

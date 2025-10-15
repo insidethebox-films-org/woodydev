@@ -16,12 +16,17 @@ COLORS = {
 
 FONTS = {
     "title": ("Arial", 14, "bold"),
+    "sub_title": ("Arial", 13, "bold"),
     "body": ("Arial", 12),
     "small": ("Arial", 10, "italic")
 }
 
 HEADER_LABEL = {
     "font": FONTS["title"]
+}
+
+SUB_HEADER_LABEL = {
+    "font": FONTS["sub_title"]
 }
 
 BODY_LABEL = {
