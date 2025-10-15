@@ -1,8 +1,10 @@
 from ...tool.woody_instance import WoodyInstance
+from ...tool.event_bus import event_bus
 from ...lib.mongodb.get_projects import get_projects_db
 from ...utils.save_load_settings import save_settings_json
 
 import os
+
 import customtkinter as ctk
 from PIL import Image
 
@@ -39,6 +41,7 @@ class HeaderFrame:
     def set_project_name_settings(self, project_name):
         save_settings_json(projectName=project_name)
         
+        event_bus.publish('project_selection_changed', project_name)
 
     def create_frame(self):
         frames_height=50
@@ -59,6 +62,7 @@ class HeaderFrame:
             corner_radius=10,        
             border_width=2,          
             border_color="#b59630",
+            fg_color="#222222",
             height=frames_height
         )
         self.logo_frame.grid_columnconfigure(0, weight=1)
@@ -72,6 +76,7 @@ class HeaderFrame:
             corner_radius=10,        
             border_width=2,          
             border_color="#77563c",
+            fg_color="#222222",
             height=frames_height
         )
         self.project_picker_frame.grid_columnconfigure(0, weight=1)

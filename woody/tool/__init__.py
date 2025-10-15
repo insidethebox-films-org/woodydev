@@ -1,7 +1,7 @@
 from .woody_instance import WoodyInstance
-from ..plugins.blender.blender_instance import BlenderInstance
+from .event_bus import EventBus
 
 __all__ = [
     'WoodyInstance',
-    'BlenderInstance'
+    'EventBus'
 ]
