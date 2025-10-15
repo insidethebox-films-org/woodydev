@@ -38,8 +38,7 @@ class HeaderFrame:
         # Schedule next refresh in 5 seconds
         self.parent.after(5000, self.refresh_projects_list)
         
-    
-    def set_project_name(self, project_name):
+    def set_project_name_settings(self, project_name):
         save_settings_json(projectName=project_name)
         
         event_bus.publish('project_selection_changed', project_name)
@@ -110,7 +109,7 @@ class HeaderFrame:
             values=get_projects_db(),
             height=25,
             state="readonly",
-            command=self.set_project_name
+            command=self.set_project_name_settings
         )
         self.projectComboBox.set(WoodyInstance().projectName)
         self.projectComboBox.grid(row=0, column=0, sticky="we", padx=12)
