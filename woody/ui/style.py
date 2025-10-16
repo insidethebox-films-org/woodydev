@@ -8,8 +8,8 @@ COLORS = {
     "hover": "#1F1F1F",
     
     "success": "#72a343",
-    "warning": "#c46c29",
-    "danger": "#b73332",
+    "warning": "#e9883f",
+    "danger": "#d13b3b",
     
 
 }
@@ -31,6 +31,11 @@ SUB_HEADER_LABEL = {
 
 BODY_LABEL = {
     "font": FONTS["body"]    
+}
+
+BODY_DANGER = {
+    "font": FONTS["body"], 
+    "text_color": COLORS["danger"]
 }
 
 BUTTON_STYLE = {

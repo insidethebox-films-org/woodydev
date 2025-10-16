@@ -10,7 +10,7 @@ class SettingsWindow:
     def __init__(self, parent):
         self.window = ctk.CTkToplevel(parent)
         self.window.title("Settings")
-        self.window.geometry("500x290")
+        self.window.geometry("500x260")
         
         self.window.transient(parent) 
         self.window.grab_set()
@@ -23,7 +23,7 @@ class SettingsWindow:
             "icons",
             "woodyIcon.ico"
         )
-        self.window.iconbitmap(icon_path)
+        self.window.after(201, lambda: self.window.iconbitmap(icon_path))
         
         # Frame
         self.frame = ctk.CTkFrame(

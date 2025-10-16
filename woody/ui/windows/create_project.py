@@ -12,7 +12,7 @@ class CreateProjectWindow:
     def __init__(self, parent):
         self.window = ctk.CTkToplevel(parent)
         self.window.title("Create Project")
-        self.window.geometry("300x275")
+        self.window.geometry("300x225")
         
         self.window.transient(parent) 
         self.window.grab_set()
@@ -23,7 +23,7 @@ class CreateProjectWindow:
             "icons",
             "woodyIcon.ico"
         )
-        self.window.iconbitmap(icon_path)
+        self.window.after(201, lambda: self.window.iconbitmap(icon_path))
         
         # Frame
         self.frame = ctk.CTkFrame(

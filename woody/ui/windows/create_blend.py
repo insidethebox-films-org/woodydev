@@ -4,18 +4,17 @@ from ...lib.mongodb import get_group_sequence_names
 from ...lib.mongodb import create_blend_db
 
 from ...plugins.blender.blender_instance import BlenderInstance
+from ...tool.woody_instance import WoodyInstance
 
 import re
 import os
-import threading
-import time
 import customtkinter as ctk
 
 class CreateBlendWindow:
     def __init__(self, parent):
         self.window = ctk.CTkToplevel(parent)
         self.window.title("Create Blender Scene")
-        self.window.geometry("300x420")
+        self.window.geometry("300x170")
         
         self.window.transient(parent) 
         self.window.grab_set()
@@ -28,9 +27,7 @@ class CreateBlendWindow:
             "icons",
             "woodyIcon.ico"
         )
-        self.window.iconbitmap(icon_path)
-        
-        threading.Thread(target=self.refresh_groups_name_comboBox, daemon=True).start()
+        self.window.after(201, lambda: self.window.iconbitmap(icon_path))
         
         # Frame
         self.frame = ctk.CTkFrame(
@@ -44,22 +41,25 @@ class CreateBlendWindow:
         
         self.create_widgets()
         
-    def refresh_groups_name_comboBox(self):
-        while True:
-            try:
-                current = self.groupsNameComboBox.get()
-                new_values = get_group_sequence_names(self.groupTypeComboBox.get())
-                
-                if new_values != self.groupsNameComboBox.cget("values"):
-                    self.groupsNameComboBox.configure(values=new_values)
-                    if current in new_values:
-                        self.groupsNameComboBox.set(current)
-                
-                time.sleep(1)
-            except:
-                time.sleep(1)
+        # Make entry unavalible if no element is selected
+        woody = WoodyInstance().browser_selection()
         
+        if not woody or not woody.get("element"):
+            self.blendNameEntry.delete(0, "end")
+            self.blendNameEntry.insert(0, "Please select an element in browser")
+            self.blendNameEntry.configure(
+                state="disabled",
+                **style.BODY_DANGER
+            )
+            self.createBlendButton.configure(state="disabled")
+
     def _create_blend_file(self):
+        
+        woody = WoodyInstance().browser_selection()
+        group_type_selection = woody.get("group_type")
+        group_selection = woody.get("group")
+        element_selection = woody.get("element")
+        
         blend_name = self.blendNameEntry.get().strip()
         # Validate blend name - prevent _latest and _v* patterns
         if self._is_invalid_blend_name(blend_name):
@@ -72,15 +72,15 @@ class CreateBlendWindow:
         
         # Append _latest to the blend name for file creation
         blend_name_with_latest = f"{blend_name}_latest"
-        group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
+        group_type = "assets" if group_type_selection == "Assets Group" else "shots"
         
         # Try to create the database entry first
-        if create_blend_db(group_type, self.groupsNameComboBox.get(), self.elementNameEntry.get(), blend_name):
+        if create_blend_db(group_type, group_selection, element_selection, blend_name):
             # Only create the file if database entry was successful
             success = self.blender.create_file(
                 group_type,
-                self.groupsNameComboBox.get(),
-                self.elementNameEntry.get(),
+                group_selection,
+                element_selection,
                 blend_name_with_latest
             )
             
@@ -98,15 +98,6 @@ class CreateBlendWindow:
         if re.search(r"_v\d+", name):
             return True
         return False
-
-    def _open_blend_file(self):
-        group_type = "assets" if self.groupTypeComboBox.get() == "Assets Group" else "shots"
-        self.blender.open_file(
-            group_type,
-            self.groupsNameComboBox.get(), 
-            self.elementNameEntry.get(),
-            self.blendNameEntry.get()
-        )
         
     def create_widgets(self):
         
@@ -121,76 +112,21 @@ class CreateBlendWindow:
         
         separator = ctk.CTkFrame(self.frame, height=2, fg_color="#414141")
         separator.grid(row=1, column=0, sticky="ew", padx=5, pady=(2, 8), columnspan=2) 
-        
-                # Group type label
-        self.groupTypeLabel = ctk.CTkLabel(
-            self.frame, 
-            text="Group Type",
-            **style.BODY_LABEL
-        )
-        self.groupTypeLabel.grid(row=2, column=0, sticky="nw", padx=8)        
-        
-        # Group type combobox
-        groupTypeValues = [
-            "Assets Group",
-            "Shots Sequence"
-        ]
-        
-        self.groupTypeComboBox = ctk.CTkComboBox(
-            self.frame,
-            values=groupTypeValues,
-            height=25,
-            state="readonly"
-        )
-        self.groupTypeComboBox.set("Assets Group")
-        self.groupTypeComboBox.grid(row=3, column=0, sticky="new", padx=8)
-        
-        # Group name label
-        self.groupNameLabel = ctk.CTkLabel(
-            self.frame, 
-            text="Group Name",
-            **style.BODY_LABEL
-        )
-        self.groupNameLabel.grid(row=4, column=0, sticky="nw", padx=8)
-        
-        # Group name combobox
-        self.groupsNameComboBox = ctk.CTkComboBox(
-            self.frame,
-            values=get_group_sequence_names(self.groupTypeComboBox.get()),
-            height=25
-        )
-        self.groupsNameComboBox.set("")
-        self.groupsNameComboBox.grid(row=5, column=0, sticky="new", padx=8)
-        
-        # Element name label
-        self.groupNameLabel = ctk.CTkLabel(
-            self.frame, 
-            text="Element Name",
-            **style.BODY_LABEL
-        )
-        self.groupNameLabel.grid(row=6, column=0, sticky="nw", padx=8)
-        
-        # Element Name
-        self.elementNameEntry = ctk.CTkEntry(
-            self.frame,
-            height=25    
-        )
-        self.elementNameEntry.grid(row=7, column=0, sticky="new", padx=8)
 
         # Blend name label
         self.groupNameLabel = ctk.CTkLabel(
             self.frame, 
-            text="Blend FileName",
+            text="Blend File Name",
             **style.BODY_LABEL
         )
-        self.groupNameLabel.grid(row=9, column=0, sticky="nw", padx=8, pady=3)
+        self.groupNameLabel.grid(row=2, column=0, sticky="nw", padx=8)
         
         # Blend Name
         self.blendNameEntry = ctk.CTkEntry(
             self.frame,
             height=25    
         )
-        self.blendNameEntry.grid(row=10, column=0, sticky="new", padx=8, pady=3)
+        self.blendNameEntry.grid(row=3, column=0, sticky="new", padx=8)
 
         # Add Blender buttons
         self.createBlendButton = ctk.CTkButton(
@@ -199,15 +135,7 @@ class CreateBlendWindow:
             **style.BUTTON_STYLE,
             command=self._create_blend_file
         )
-        self.createBlendButton.grid(row=11, sticky="nwe", padx=8, pady=3)
-
-        self.openBlendButton = ctk.CTkButton(
-            self.frame,
-            text="Open in Blender",
-            **style.BUTTON_STYLE,
-            command=self._open_blend_file
-        )
-        self.openBlendButton.grid(row=12, sticky="nwe", padx=8, pady=3)
+        self.createBlendButton.grid(row=4, sticky="nwe", padx=8, pady=8)
 
     def run(self):
         self.window.wait_window()
