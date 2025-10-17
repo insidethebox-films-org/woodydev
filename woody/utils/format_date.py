@@ -6,13 +6,13 @@ def format_date(key=None, value=None):
         return "None"
     
     if isinstance(value, datetime):
-        return value.strftime("%b %d, %Y  %I:%M %p")
+        return value.strftime("%d %b, %Y  %I:%M %p")
     
     if key in ['created_time', 'modified_time']:
         try:
             if isinstance(value, str):
                 dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
-                return dt.strftime("%b %d, %Y  %I:%M %p")
+                return dt.strftime("%d %b, %Y  %I:%M %p")
         except:
             pass
         

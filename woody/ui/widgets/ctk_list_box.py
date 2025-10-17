@@ -26,11 +26,13 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
         command=None,
         wraplength=0,
         justify="left",
+        state="normal",
         **kwargs,
         ):
 
         self.buttons = {}
         self.bindings = {}
+        self.state = state
 
         super().__init__(
             master,
@@ -108,6 +110,10 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
 
     def select(self, index):
         """select the option"""
+        
+        if self.state == "disabled":
+            return
+        
         if str(index).lower() == "all":
             if self.multiple:
                 for button in self.buttons.values():
@@ -424,7 +430,11 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
             self._scrollbar.configure(height=kwargs["height"])
         if "multiple_selection" in kwargs:
             self.multiple = kwargs.pop("multiple_selection")
-        
+        if "state" in kwargs:
+            self.state = kwargs.pop("state")
+            for button in self.buttons.values():
+                button.configure(state=self.state)
+            
         super().configure(**kwargs)
 
     def cget(self, param):

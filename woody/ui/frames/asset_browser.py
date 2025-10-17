@@ -35,8 +35,12 @@ class AssetBrowserFrame:
         print(f"Asset browser refreshing for project: {project_name}")
         self.group_list_box.delete(0, "END")
         self.element_list_box.delete(0, "END")
-        self.root_list_box.activate(0)
-        self.group_list_box.activate(0)
+        
+        if self.root_list_box.size() > 0:
+            self.root_list_box.activate(0)
+        
+        if self.group_list_box.size() > 0:
+            self.group_list_box.activate(0)
         
     def on_root_select(self, selected):
         self.current_group_type = selected
@@ -47,6 +51,13 @@ class AssetBrowserFrame:
         for i, group in enumerate(groups):
             self.group_list_box.insert(i, group)
         self.element_list_box.delete(0, "END")
+        
+        self.asset_browser_selection = {'group_type': self.current_group_type}
+        
+        WoodyInstance.browser_selection(self.asset_browser_selection)
+        WoodyInstance.asset_details(None)
+        
+        event_bus.publish('browser_selection_changed', self.asset_browser_selection)
             
     def on_group_select(self, selected):
         self.current_group = selected
@@ -77,7 +88,6 @@ class AssetBrowserFrame:
         
         event_bus.publish('browser_selection_changed', self.asset_browser_selection)
             
-        
     def create_widgets(self):
         
         # Root list box

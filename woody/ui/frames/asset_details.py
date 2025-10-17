@@ -26,24 +26,37 @@ class AssetDetailsFrame:
         self.frame.grid_rowconfigure(2, weight=1)
         
     def get_asset_details(self, new_browser_selection):
+        
+        if not new_browser_selection:
+            print("asset_details: Received None selection")
+            return
+        
+        if not new_browser_selection.get("group"):
+            self.title_label.configure(text="Select an item")
+            
+            for widget in self.asset_details_frame.winfo_children():
+                widget.destroy()
+            return
+        
         asset_details = WoodyInstance().asset_details()
         
-        if not asset_details or not new_browser_selection:
+        if not asset_details:
+            print("asset_details: No asset details available")
             return
         
         # Update title
         if new_browser_selection.get("group_type") == "Assets Group":
             root = "assets"
-            group = asset_details.get("group")
+            group = new_browser_selection.get("group")
         else:
             root = "shots"
-            group = asset_details.get("sequence")
+            group = new_browser_selection.get("group")
         
-        name = asset_details.get("name")
-        path = f"{root}/{group}/{name}" if group else f"{root}/{name}"
+        name = new_browser_selection.get("element")
+        path = f"{root}/{group}/{name}" if group and name else f"{root}/{group}"
         self.title_label.configure(text=path)
-        
-        # Dynamic detail feilds create
+              
+        # Dynamic detail fields create
         for widget in self.asset_details_frame.winfo_children():
             widget.destroy()
         
@@ -120,7 +133,7 @@ class AssetDetailsFrame:
         
         self.title_label = ctk.CTkLabel(
             self.title_frame,
-            text="Select an asset",
+            text="Select an item",
             **style.SUB_HEADER_LABEL
         )
         self.title_label.grid(row=0, padx=12, sticky="w")

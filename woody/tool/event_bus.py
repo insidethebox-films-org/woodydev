@@ -8,7 +8,9 @@ class EventBus:
             self.listeners[event_name] = []
         
         self.listeners[event_name].append(callback)
-        print(f"Subscribed to '{event_name}' event")
+        
+        callback_name = f"{callback.__self__.__class__.__name__}.{callback.__name__}" if hasattr(callback, '__self__') else callback.__name__
+        print(f"Subscribed {callback_name} to '{event_name}'")
     
     def publish(self, event_name, data=None):
         if event_name in self.listeners:
@@ -16,8 +18,10 @@ class EventBus:
                 try:
                     callback(data)
                 except Exception as e:
-                    print(f"Error in event callback: {e}")
-        else:
-            print(f"No subscribers for '{event_name}' event")
+                    callback_name = f"{callback.__self__.__class__.__name__}.{callback.__name__}" if hasattr(callback, '__self__') else callback.__name__
+                    print(f"Error in {callback_name} callback for '{event_name}': {e}")
+                    
+                    import traceback
+                    traceback.print_exc()
 
 event_bus = EventBus()

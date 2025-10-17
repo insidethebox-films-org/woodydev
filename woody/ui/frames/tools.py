@@ -2,6 +2,7 @@ from .. import style
 from ..windows import SettingsWindow
 from ..windows import CreateProjectWindow
 from ..windows import CreateElementWindow
+from ..windows import CreateGroupWindow
 from ..windows import CreateBlendWindow
 
 import os
@@ -23,7 +24,7 @@ class ToolsFrame:
             width=50
             )
         self.frame.grid_columnconfigure(0, weight=1)
-        self.frame.grid_rowconfigure(2, weight=1)
+        self.frame.grid_rowconfigure(3, weight=1)
         self.frame.grid_propagate(False)
 
     def load_icon(self, path, size):
@@ -46,6 +47,11 @@ class ToolsFrame:
     def open_create_project(self):
         create_project = CreateProjectWindow(self.parent.winfo_toplevel())
         create_project.run()
+        
+    def open_create_group(self):
+        create_group = CreateGroupWindow(self.parent.winfo_toplevel())
+        create_group.run()
+        return
     
     def open_create_element(self):
         create_element = CreateElementWindow(self.parent.winfo_toplevel())
@@ -77,6 +83,25 @@ class ToolsFrame:
             command=self.open_create_project
         )
         self.createProjectButton.grid(row=0, column=0, padx=0, pady=(5, 3))
+        
+        # Create Group Button
+        create_group_icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "tools", "create_group.png")
+        create_group_icon = self.load_icon(create_group_icon_path, 28)
+
+        self.createGroupButton = ctk.CTkButton(
+            self.frame,
+            image=create_group_icon,
+            text="",
+            width=40,
+            height=40,
+            border_width=2,
+            border_color="#b34555",
+            **style.BUTTON_STYLE,
+            
+            command=self.open_create_group
+        )
+        self.createGroupButton.grid(row=1, column=0, padx=0, pady=(0, 3), sticky="n")
+        
 
         # Create Element Button
         create_element_icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "tools", "create_element.png")
@@ -94,7 +119,7 @@ class ToolsFrame:
             
             command=self.open_create_element
         )
-        self.createElementButton.grid(row=1, column=0, padx=0, pady=(0, 3), sticky="n")
+        self.createElementButton.grid(row=2, column=0, padx=0, pady=(0, 3))
         
         # Create Blend Button
         create_blend_icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "tools", "blender.png")
@@ -112,7 +137,7 @@ class ToolsFrame:
             
             command=self.open_create_blend
         )
-        self.createBlendButton.grid(row=2, column=0, padx=0, pady=(0, 5), sticky="n")
+        self.createBlendButton.grid(row=3, column=0, padx=0, pady=(0, 5), sticky="n")
                 
                 
         # Settings Button
@@ -131,5 +156,5 @@ class ToolsFrame:
             
             command=self.open_settings
         )
-        self.settingsButton.grid(row=3, column=0, padx=0, pady=5, sticky="s")
+        self.settingsButton.grid(row=4, column=0, padx=0, pady=5, sticky="s")
 

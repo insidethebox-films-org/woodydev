@@ -25,12 +25,12 @@ class BlenderInstance:
             group_type,
             group_name,
             element_name,
-            blend_name
+            blend_name,
         )
         
         return create_blend_file(self.executable, blend_path)
 
-    def open_file(self, group_type: str, group_name: str, element_name: str, blend_name: str) -> bool:
+    def open_file(self, group_type: str, group_name: str, element_name: str, blend_name: str, version: str) -> bool:
         """Opens existing blend file with addon update check"""
         if not self.executable or not os.path.exists(self.executable):
             print(f"Invalid Blender executable path: {self.executable}")
@@ -42,7 +42,8 @@ class BlenderInstance:
             group_type,
             group_name,
             element_name,
-            blend_name
+            blend_name,
+            version
         )
         
         return open_blend_file(self.executable, blend_path, self.addon_zip)
@@ -59,5 +60,5 @@ class BlenderInstance:
             group_type,
             group_name,
             element_name,
-            blend_name
+            blend_name,
         )

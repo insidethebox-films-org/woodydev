@@ -5,9 +5,12 @@ import os
 
 class WoodyApp:
     def __init__(self):
+        customtkinter.set_appearance_mode("dark")
+        
         self.mainWindow = customtkinter.CTk()
         self.mainWindow.geometry("1300x800")
         self.mainWindow.title("Woody")
+        self.mainWindow.configure
         
         # Create icon
         icon_path = os.path.join(os.path.dirname(__file__), "icons", "woodyIcon.ico")
