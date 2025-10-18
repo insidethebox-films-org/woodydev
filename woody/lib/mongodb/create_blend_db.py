@@ -43,8 +43,8 @@ def create_blend_db(group_type, group_name, element_name, blend_name):
     blend_path = blend.get_blend_path(group_type, group_name, element_name, blend_name_with_latest)
     collection_name = "blends"
     
-    # Check if document with the same name already exists
-    if db.connect[collection_name].find_one({"name": blend_name}):
+    # Check if document with the same name and element id already exists
+    if db.connect[collection_name].find_one({"name": blend_name, "element_id": element_id}):
         print(f"Document '{blend_name}' already exists in collection '{collection_name}'.")
         return False
     

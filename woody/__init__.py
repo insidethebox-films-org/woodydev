@@ -5,9 +5,12 @@ import os
 
 class WoodyApp:
     def __init__(self):
+        customtkinter.set_appearance_mode("dark")
+        
         self.mainWindow = customtkinter.CTk()
         self.mainWindow.geometry("1300x800")
         self.mainWindow.title("Woody")
+        self.mainWindow.configure
         
         # Create icon
         icon_path = os.path.join(os.path.dirname(__file__), "icons", "woodyIcon.ico")
@@ -25,8 +28,8 @@ class WoodyApp:
 
         self.mainWindow.grid_columnconfigure(0, weight=0)
         self.mainWindow.grid_columnconfigure(1, weight=1)
-        self.mainWindow.grid_columnconfigure(2, weight=2)
-        self.mainWindow.grid_columnconfigure(3, weight=2)
+        self.mainWindow.grid_columnconfigure(2, weight=3)
+        self.mainWindow.grid_columnconfigure(3, weight=3)
         
         # Header
         self.header_frame = HeaderFrame(self.mainWindow)

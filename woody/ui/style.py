@@ -8,14 +8,15 @@ COLORS = {
     "hover": "#1F1F1F",
     
     "success": "#72a343",
-    "warning": "#c46c29",
-    "danger": "#b73332",
+    "warning": "#e9883f",
+    "danger": "#d13b3b",
     
 
 }
 
 FONTS = {
     "title": ("Arial", 14, "bold"),
+    "sub_title": ("Arial", 13, "bold"),
     "body": ("Arial", 12),
     "small": ("Arial", 10, "italic")
 }
@@ -24,8 +25,17 @@ HEADER_LABEL = {
     "font": FONTS["title"]
 }
 
+SUB_HEADER_LABEL = {
+    "font": FONTS["sub_title"]
+}
+
 BODY_LABEL = {
     "font": FONTS["body"]    
+}
+
+BODY_DANGER = {
+    "font": FONTS["body"], 
+    "text_color": COLORS["danger"]
 }
 
 BUTTON_STYLE = {

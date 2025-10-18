@@ -1,5 +1,5 @@
 from .. import style
-from ...utils import save_settings_json
+from ...tool.woody_instance import WoodyInstance
 from ...lib.folder import create_project_fd
 from ...lib.mongodb import create_project_db
 from ...plugins.blender.install_blender_libraries import install_blender_libraries
@@ -12,7 +12,7 @@ class CreateProjectWindow:
     def __init__(self, parent):
         self.window = ctk.CTkToplevel(parent)
         self.window.title("Create Project")
-        self.window.geometry("300x275")
+        self.window.geometry("300x225")
         
         self.window.transient(parent) 
         self.window.grab_set()
@@ -23,7 +23,7 @@ class CreateProjectWindow:
             "icons",
             "woodyIcon.ico"
         )
-        self.window.iconbitmap(icon_path)
+        self.window.after(201, lambda: self.window.iconbitmap(icon_path))
         
         # Frame
         self.frame = ctk.CTkFrame(
@@ -53,7 +53,7 @@ class CreateProjectWindow:
         create_project_fd(project_name, project_directory)
 
         # Install Blender libraries
-        blender_executable_path = self.blenderExecutableEntry.get().strip()
+        blender_executable_path = WoodyInstance().blenderExecutable.strip()
         if blender_executable_path:
             print("Installing required libraries into Blender...")
             if install_blender_libraries(blender_executable_path):
@@ -111,21 +111,6 @@ class CreateProjectWindow:
             )
         self.projectDirectoryEntry.grid(row=5, column=0, sticky="new", padx=8, columnspan=2)
         
-        # Blender executable label
-        self.blenderExecutableLabel = ctk.CTkLabel(
-            self.frame, 
-            text="Blender Executable",
-            **style.BODY_LABEL
-        )
-        self.blenderExecutableLabel.grid(row=8, column=0, sticky="nw", padx=8)
-
-        # Blender executable entry
-        self.blenderExecutableEntry = ctk.CTkEntry(
-            self.frame,
-            height=25
-            )
-        self.blenderExecutableEntry.grid(row=9, column=0, sticky="new", padx=8, columnspan=2)
-        
         # Create project button
         self.createProjectButton = ctk.CTkButton(
             self.frame,
@@ -134,7 +119,7 @@ class CreateProjectWindow:
             
             command=self.create_project
         )
-        self.createProjectButton.grid(row=10, column=0, sticky="nwe", padx=8, pady=8)
+        self.createProjectButton.grid(row=6, column=0, sticky="nwe", padx=8, pady=8)
     
     def run(self):
         self.window.wait_window()
