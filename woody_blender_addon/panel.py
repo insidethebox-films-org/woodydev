@@ -18,3 +18,6 @@ class VIEW3D_PT_context(bpy.types.Panel):
         # Add Version Up button
         row = rootBox.row()
         row.operator("woody.version_up", text="Version Up", icon="FILE_REFRESH")
+        #Add Publish button
+        row = rootBox.row()
+        row.operator("woody.publish", text="Publish", icon="FILE_REFRESH")

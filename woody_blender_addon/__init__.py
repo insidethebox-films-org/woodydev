@@ -12,6 +12,7 @@ import bpy
 from .panel import VIEW3D_PT_context
 from .preferences import WoodyAddonPreferences
 from .operators.version_up import WOODY_OT_version_up
+from .operators.publish.publish_operator import WOODY_OT_publish
 
 
 # =============== Registration ===============
@@ -19,7 +20,8 @@ from .operators.version_up import WOODY_OT_version_up
 classes = [
     VIEW3D_PT_context,
     WOODY_OT_version_up,
-    WoodyAddonPreferences
+    WoodyAddonPreferences,
+    WOODY_OT_publish
 ]
 
 
