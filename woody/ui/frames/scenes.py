@@ -77,7 +77,7 @@ class ScenesFrame:
             else:
                 try:
                     num = int(v) 
-                    return (1, num)
+                    return (1, -num)
                 except ValueError:
                     return (2, v)
                 
