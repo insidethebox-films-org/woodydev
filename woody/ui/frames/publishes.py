@@ -62,7 +62,7 @@ class PublishesFrame:
     
         docs = get_publish_doc()
         publish_name = selected
-        versions, version_data = get_publish_versions(docs, publish_name)
+        versions = get_publish_versions(docs, publish_name)
         
         self.publish_version_list_box.delete(0, "END")
         
@@ -92,14 +92,15 @@ class PublishesFrame:
         else:
             self.get_publish_button.configure(state="disabled")
         
-    def copy_publish_path(self):
+    def copy_publish_id(self):
         
         docs = get_publish_doc()
-        publish_name = self.publishes_list_box.get()
+        doc = next((d for d in docs if d["custom_name"] == self.publishes_list_box.get()), None)
         version = self.publish_version_list_box.get()
-        versions, version_data = get_publish_versions(docs, publish_name, version)
+        publish_id = doc.get("publish_id")
         
-        text = version_data.get("published_path")
+        text = f"{publish_id}#ver:{version}"
+    
         system = platform.system()
 
         if system == "Darwin":  # macOS
@@ -109,8 +110,7 @@ class PublishesFrame:
         else:  # Linux
             subprocess.run("xclip -selection clipboard", shell=True, text=True, input=text)
             
-        print("Publish path copied to clipboard!")
-        
+        print("Publish id copied to clipboard!")
 
             
     def create_widgets(self):
@@ -203,9 +203,9 @@ class PublishesFrame:
         # Get publish button
         self.get_publish_button = ctk.CTkButton(
             self.publish_options_frame,
-            text="Copy Publish",
+            text="Copy Publish ID",
             **style.BUTTON_STYLE,
             
-            command=self.copy_publish_path
+            command=self.copy_publish_id
         )
         self.get_publish_button.grid(row=0, padx=7, pady=8, sticky="ew")

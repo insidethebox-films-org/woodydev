@@ -37,7 +37,4 @@ def get_publish_versions(docs, publish_name, publish_version=None):
     publish_versions = doc.get("published_versions")
     versions = list(publish_versions)
     
-    versions_data = doc.get("published_versions", {})
-    version_data = versions_data.get(publish_version)
-    
-    return versions, version_data
+    return versions
