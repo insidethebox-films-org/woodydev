@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -97,6 +98,7 @@ class PublishDatabaseHandler:
             else:
                 # Create new document with new structure
                 new_document = {
+                    "publish_id": str(uuid.uuid4()),
                     "source_asset": source_asset,
                     "publish_type": publish_type,
                     "custom_name": custom_name,
