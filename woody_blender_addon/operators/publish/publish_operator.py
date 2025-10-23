@@ -130,9 +130,9 @@ class WOODY_OT_publish(bpy.types.Operator):
         items=[
             ('COLLECTION', 'Collection', 'Publish entire collection with objects'),
             ('MATERIAL', 'Material Only', 'Publish material/shader only'),
-            ('MESH', 'Mesh Only', 'Publish mesh geometry only'),
             ('NODE_GROUP', 'Node Group', 'Publish node group (geometry or shader)'),
-            ('OBJECT', 'Single Object', 'Publish individual object')
+            ('OBJECT', 'Single Object', 'Publish individual object'),
+            #('MESH', 'Mesh Only', 'Publish mesh geometry only'),
         ],
         default='COLLECTION',
         update=on_publish_type_changed

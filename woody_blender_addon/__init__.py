@@ -13,7 +13,8 @@ from .panel import VIEW3D_PT_context
 from .preferences import WoodyAddonPreferences
 from .operators.version_up import WOODY_OT_version_up
 from .operators.publish.publish_operator import WOODY_OT_publish
-from .operators.load_publish import WOODY_OT_load_publish, WOODY_OT_refresh_loaded_publishes, register_properties, unregister_properties
+from .operators.load_publish import WOODY_OT_load_publish, WOODY_OT_override_publish, WOODY_OT_refresh_loaded_publishes, WOODY_OT_delete_publish
+from .properties import register_properties, unregister_properties
 
 
 # =============== Registration ===============
@@ -24,7 +25,9 @@ classes = [
     WoodyAddonPreferences,
     WOODY_OT_publish,
     WOODY_OT_load_publish,
-    WOODY_OT_refresh_loaded_publishes
+    WOODY_OT_refresh_loaded_publishes,
+    WOODY_OT_override_publish,
+    WOODY_OT_delete_publish
 ]
 
 
