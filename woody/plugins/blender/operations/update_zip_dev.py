@@ -2,34 +2,48 @@ import os
 import zipfile
 from pathlib import Path
 
-def update_zip_dev(addon_dir: str, addon_zip: str) -> bool:
-    """Updates the addon zip file for development
+def update_zip_dev(addon_zip: str) -> bool:
+    """Updates the addon zip file for development"""
     
-    Args:
-        addon_dir (str): Path to the addon source directory
-        addon_zip (str): Path to the output zip file
+    addon_dir = Path(__file__).resolve().parent.parent.parent.parent.parent / "woody_blender_addon"
     
-    Returns:
-        bool: True if zip file was created successfully
-    """
+    print(f"Current file: {__file__}")
+    print(f"Addon exists: {addon_dir.exists()}")
+    
+    if not addon_dir.exists():
+        print(f"ERROR: Addon directory not found!")
+        return False
+    
     try:
-        # Remove existing zip if it exists
         if os.path.exists(addon_zip):
             os.remove(addon_zip)
+            print(f"\nRemoved old zip: {addon_zip}")
         
-        # Create parent directory for zip if it doesn't exist
         os.makedirs(os.path.dirname(addon_zip), exist_ok=True)
+
+        file_count = 0
         
-        # Create zip file with correct structure
-        addon_dir = Path(addon_dir)
         with zipfile.ZipFile(addon_zip, 'w', zipfile.ZIP_DEFLATED) as z:
-            for file in addon_dir.rglob('*'):
-                relative_path = os.path.join('woody_blender_addon', file.relative_to(addon_dir))
-                z.write(file, relative_path)
+            for file in sorted(addon_dir.rglob('*')):
+                
+                # Only files
+                if file.is_file():
+                    relative_path = file.relative_to(addon_dir.parent)
+                    
+                    with open(file, 'rb') as f:
+                        file_data = f.read()
+                    
+                    zip_path = str(relative_path).replace('\\', '/')
+                    z.writestr(zip_path, file_data)
+                    file_count += 1
         
-        print(f"Dev update complete - addon zip created at: {addon_zip}")
+        print(f"Zip created!")
+        print(f"Files: {file_count}")
+        
         return True
         
     except Exception as e:
-        print(f"Error during dev update: {str(e)}")
+        print(f"\nERROR: {e}")
+        import traceback
+        traceback.print_exc()
         return False

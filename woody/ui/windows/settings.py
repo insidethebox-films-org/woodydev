@@ -1,7 +1,8 @@
 from .. import style
 from ...utils import save_settings_json, load_settings_json
-
 from ...plugins.blender.blender_instance import BlenderInstance
+from ...tool.woody_instance import WoodyInstance
+from ...plugins.blender.install_blender_libraries import install_blender_libraries
 
 import os
 import customtkinter as ctk
@@ -10,7 +11,7 @@ class SettingsWindow:
     def __init__(self, parent):
         self.window = ctk.CTkToplevel(parent)
         self.window.title("Settings")
-        self.window.geometry("500x260")
+        self.window.geometry("500x315")
         
         self.window.transient(parent) 
         self.window.grab_set()
@@ -47,12 +48,15 @@ class SettingsWindow:
         mongoDBAddress = self.mongoDBAddressEntry.get()
         blenderExecutable = self.blenderExecutableEntry.get()
         
-
         print(f"Saving settings:\nMongoDB Address: {mongoDBAddress}\nBlender Executable: {blenderExecutable}")
         save_settings_json(mongoDBAddress=mongoDBAddress, blenderExecutable=blenderExecutable)
         self.window.destroy()
     
-    def _dev_update(self):
+    def install_blender(self):
+        blender_executable_path = WoodyInstance().blenderExecutable.strip()
+        install_blender_libraries(blender_executable_path)
+    
+    def dev_update(self):
         if self.blender.dev_update():
             print("Dev Update Complete", "Addon zip has been recreated successfully!")
         else:
@@ -113,13 +117,24 @@ class SettingsWindow:
         )
         self.saveSettingsButton.grid(row=6, column=0, sticky="nwe", padx=8, pady=8)
         
+        separator = ctk.CTkFrame(self.frame, height=2, fg_color="#414141")
+        separator.grid(row=7, column=0, sticky="ew", padx=5, pady=(2, 8), columnspan=2)
+        
+        self.blenderInstallButton = ctk.CTkButton(
+            self.frame,
+            text="Install Blender Addon and Dependencies",
+            **style.BUTTON_STYLE,
+            command=self.install_blender
+            )
+        self.blenderInstallButton.grid(row=8, sticky="nwe", padx=8, pady=(0,8))
+        
         self.devUpdateButton = ctk.CTkButton(
             self.frame,
             text="Dev Update",
             **style.BUTTON_STYLE,
-            command=self._dev_update
+            command=self.dev_update
             )
-        self.devUpdateButton.grid(row=7, sticky="nwe", padx=8, pady=(0,8))
+        self.devUpdateButton.grid(row=9, sticky="nwe", padx=8, pady=(0,8))
     
     def run(self):
         self.window.wait_window()

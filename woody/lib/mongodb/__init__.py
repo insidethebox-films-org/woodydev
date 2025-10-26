@@ -5,8 +5,6 @@ from .get_groups_elements import get_group_sequence_names, get_elements_names
 from .create_blend_db import create_blend_db
 from .get_projects import get_projects_db
 from .get_group_element_details import get_group_element_details
-from .get_blend_doc import get_blend_doc, get_blend_versions
-from .get_publish_doc import get_publish_doc, get_publish_versions
 
 __all__ = [
     'create_project_db',
@@ -18,8 +16,4 @@ __all__ = [
     'get_projects_db',
     'get_group_sequence_names',
     "get_group_element_details",
-    "get_blend_doc",
-    "get_blend_versions",
-    "get_publish_doc",
-    "get_publish_versions"
 ]

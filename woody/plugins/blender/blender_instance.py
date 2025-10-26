@@ -10,9 +10,10 @@ class BlenderInstance:
         self.db = DB_instance()
         self.executable = set_executable_path(self.woody.blenderExecutable)
 
-        self.addon_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../woody_blender_addon"))  #TODO hardcoded path
+        self.addon_dir = get_addon_dir(self.woody.blenderExecutable)
         self.addon_zip = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../woody_blender_addon.zip")) #TODO hardcoded path
 
+    
     def create_file(self, group_type: str, group_name: str, element_name: str, blend_name: str) -> bool:
         """Creates a new blend file"""
         if not self.executable or not os.path.exists(self.executable):
@@ -50,7 +51,7 @@ class BlenderInstance:
     
     def dev_update(self) -> bool:
         """Updates the addon zip file for development"""
-        return update_zip_dev(self.addon_dir, self.addon_zip)
+        return update_zip_dev(self.addon_zip)
     
     def get_blend_path(self, group_type: str, group_name: str, element_name: str, blend_name: str) -> str:
         """Gets the blend file path for given parameters"""

@@ -1,8 +1,8 @@
 from .. import style
 from ...tool.woody_instance import WoodyInstance
+from ...database.db_instance import DB_instance
 from ...tool.event_bus import event_bus
 from ..widgets import CTkListbox
-from ...lib.mongodb.get_blend_doc import get_blend_doc, get_blend_versions
 from ...plugins.blender.blender_instance import BlenderInstance
 
 import customtkinter as ctk
@@ -37,16 +37,40 @@ class ScenesFrame:
         self.blend_version_list_box.delete(0, "END")
         
         self.open_blend_button.configure(state="disabled")
-        
-        if not new_browser_selection:
+
+        if len(new_browser_selection) < 3:
             return
         
         if not new_browser_selection.get("element"):
             return
         
-        elements = get_blend_doc()
+        root = new_browser_selection.get("group_type")
+        group = new_browser_selection.get("group")
+        element = new_browser_selection.get("element")
         
-        if not elements:
+        if root == "Assets Group":
+            collection_name = "assets"
+            id_field = "asset_id"
+        else:
+            collection_name = "shots"
+            id_field = "shot_id"
+            
+        self.element_id = DB_instance().get_docs(
+            collection=collection_name, 
+            key=["group", "name"],
+            value=[group, element], 
+            key_filter=id_field,
+            find_one=True
+            )
+        
+        blends = DB_instance().get_docs(
+            collection="blends",
+            key=["element_id"],
+            value=[self.element_id],
+            key_filter="name"
+        )
+
+        if not blends:
             self.blends_list_box.insert("END", "No scenes found")
             self.blends_list_box.configure(state="disabled")
             return
@@ -54,15 +78,21 @@ class ScenesFrame:
         self.blends_list_box.configure(state="normal")
         
         # Populate the listbox
-        for i, element in enumerate(elements):
-            name = element.get("name", "Unnamed")
+        for i, name in enumerate(blends):
             self.blends_list_box.insert(i, name)
+            
     
     def get_blend_versions(self, selected):
-    
-        docs = get_blend_doc()
-        blend_name = selected
-        versions = get_blend_versions(docs, blend_name)
+        
+        versions_doc = DB_instance().get_docs(
+            collection="blends",
+            key=["element_id", "name"],
+            value=[self.element_id, selected],
+            find_one=True
+        )
+
+        blend_versions_dict = versions_doc.get("blend_files", {}) if versions_doc else {}
+        versions = list(blend_versions_dict.values())
         
         self.blend_version_list_box.delete(0, "END")
         

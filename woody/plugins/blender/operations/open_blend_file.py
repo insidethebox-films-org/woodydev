@@ -1,13 +1,10 @@
-import os
 import subprocess
-import time
-
 from pathlib import Path
-from .get_zip_hash import get_zip_hash
 from ....tool.woody_instance import WoodyInstance
 
 def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
-    """Opens existing blend file with addon update check and sets preferences
+    """
+    Opens existing blend file with addon update check and sets preferences
     
     Args:
         executable (str): Path to Blender executable
@@ -17,129 +14,130 @@ def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
     Returns:
         bool: True if blend file was opened successfully
     """
+    
     try:
-        # Get current MongoDB address from Woody
         woody_instance = WoodyInstance()
         mongo_address = woody_instance.mongoDBAddress or ""
         project_name = woody_instance.projectName or ""
         
-        print(f"Setting Blender addon preferences:")
-        print(f"  MongoDB Address: {mongo_address}")
-        print(f"  Project Name: {project_name}")
-        
-        blend_dir = os.path.dirname(blend_path)
-        
-        # Convert to Path object to handle network paths better
-        blend_dir_path = Path(blend_dir)
-        
-        # Create all directories in path if they don't exist
+        blend_dir_path = Path(blend_path).parent
         blend_dir_path.mkdir(parents=True, exist_ok=True)
         
-        # Create startup script in same directory as blend file
-        startup_path = blend_dir_path / "_startup.py"
+        startup_path = blend_dir_path / "_woody_startup.py"
 
-        # Create startup script (now includes preference setting)
         startup_script = f"""
 import bpy
 import addon_utils
 import os
 import hashlib
 import json
+import shutil
 
 addon_name = "woody_blender_addon"
 zip_path = r"{addon_zip}"
-current_hash = "{get_zip_hash(addon_zip)}"
 
-# Get stored hash if it exists
+# Get current hash
+def get_zip_hash(zip_path):
+    if not os.path.exists(zip_path):
+        return ""
+    with open(zip_path, 'rb') as f:
+        return hashlib.md5(f.read()).hexdigest()
+
+current_hash = get_zip_hash(zip_path)
+
+# Get stored hash
 prefs_path = os.path.join(bpy.utils.user_resource('CONFIG'), "woody_addon_hash.json")
 stored_hash = ""
 if os.path.exists(prefs_path):
-    with open(prefs_path, 'r') as f:
-        stored_hash = json.load(f).get('hash', '')
+    try:
+        with open(prefs_path, 'r') as f:
+            stored_hash = json.load(f).get('hash', '')
+    except:
+        pass
 
-# Only update if hash is different
-if current_hash != stored_hash:
-    print(f"Addon update detected, reinstalling {{addon_name}}...")
+addons_path = bpy.utils.user_resource('SCRIPTS', path="addons")
+addon_folder = os.path.join(addons_path, addon_name)
+addon_exists = os.path.exists(addon_folder)
+
+# Update if hash changed OR addon doesn't exist
+if current_hash != stored_hash or not addon_exists:
+    print(f"Updating {{addon_name}}...")
+    print(f"  Reason: {{'Hash changed' if current_hash != stored_hash else 'Addon not installed'}}")
     
-    # Safely disable addon if enabled
+    # Disable addon if currently enabled
     if addon_name in bpy.context.preferences.addons:
-        addon_utils.disable(addon_name)
+        try:
+            addon_utils.disable(addon_name)
+        except:
+            pass
     
-    # Remove addon modules from sys.modules to force reload
+    # Remove from sys.modules to force reload
     import sys
     for key in list(sys.modules.keys()):
         if key.startswith(addon_name):
             del sys.modules[key]
     
-    # Install and enable addon
-    bpy.ops.preferences.addon_install(overwrite=True, target='DEFAULT', filepath=zip_path)
-    addon_utils.enable(addon_name, default_set=True, persistent=True)
+    # Remove old addon folder
+    if addon_exists:
+        try:
+            shutil.rmtree(addon_folder)
+            print(f"  Removed old addon folder")
+        except Exception as e:
+            print(f"  Warning: Could not remove old folder: {{e}}")
     
-    # Store new hash
-    with open(prefs_path, 'w') as f:
-        json.dump({{'hash': current_hash}}, f)
+    # Install new addon
+    try:
+        bpy.ops.preferences.addon_install(overwrite=True, target='DEFAULT', filepath=zip_path)
+        addon_utils.enable(addon_name, default_set=True, persistent=True)
+        
+        # Store new hash
+        os.makedirs(os.path.dirname(prefs_path), exist_ok=True)
+        with open(prefs_path, 'w') as f:
+            json.dump({{'hash': current_hash}}, f)
+        
+        print(f"Addon installed and enabled")
+    except Exception as e:
+        print(f"  Error installing addon: {{e}}")
+        import traceback
+        traceback.print_exc()
 else:
     print(f"Addon {{addon_name}} is up to date")
 
-# Set the Woody addon preferences
+# Always ensure addon is enabled
+if addon_name not in bpy.context.preferences.addons:
+    try:
+        addon_utils.enable(addon_name, default_set=True, persistent=True)
+        print(f"Addon enabled")
+    except Exception as e:
+        print(f"  Warning: Could not enable addon: {{e}}")
+
+# Set preferences
 try:
     addon_prefs = bpy.context.preferences.addons["woody_blender_addon"].preferences
     addon_prefs.mongodb_address = "{mongo_address}"
     addon_prefs.project_name = "{project_name}"
-    
-    print("SUCCESS: Woody addon preferences set successfully")
-    print(f"  MongoDB Address: {{addon_prefs.mongodb_address}}")
-    print(f"  Project Name: {{addon_prefs.project_name}}")
-    
+    bpy.ops.wm.save_userpref()
+    print(f"Preferences set")
 except Exception as e:
-    print(f" Error setting preferences: {{e}}")
+    print(f"  Error setting preferences: {{e}}")
 
-# Save preferences
-bpy.ops.wm.save_userpref()
+# Clean up startup script
+try:
+    os.remove(__file__)
+except:
+    pass
 """
-    
-        print(f"Writing startup script to: {startup_path}")
         
-        # Write startup script
-        startup_path.write_text(startup_script)
-        time.sleep(0.5)  # Give the filesystem time to complete the write
+        startup_path.write_text(startup_script, encoding='utf-8')
         
-        if not startup_path.exists():
-            print(f"Error: Failed to create startup script at {startup_path}")
-            return False
-            
-        try:
-            # Verify we can read the file
-            test_read = startup_path.read_text()
-            if not test_read:
-                print("Error: Startup script exists but is empty")
-                return False
-        except Exception as e:
-            print(f"Error: Cannot read startup script: {e}")
-            return False
-
-        print(f"Launching Blender with: {blend_path}")
-        
-        # Launch Blender
         subprocess.Popen([
             executable,
-            str(blend_path),  # Convert Path to string
-            "--python", str(startup_path)  # Convert Path to string
+            str(blend_path),
+            "--python", str(startup_path)
         ])
-        
-        # Give Blender time to read the startup script before we delete it
-        time.sleep(2)
 
         return True
     
     except Exception as e:
-        print(f"Error in open_blend_file: {str(e)}")
+        print(f"Error opening blend file: {e}")
         return False
-    finally:
-        # Clean up startup script
-        try:
-            if startup_path.exists():
-                startup_path.unlink()
-                print(f"Cleaned up startup script: {startup_path}")
-        except Exception as e:
-            print(f"Error cleaning up startup script: {str(e)}")
