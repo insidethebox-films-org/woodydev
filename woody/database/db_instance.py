@@ -96,7 +96,7 @@ class DB_instance:
                 return filtered_docs
                 
         except Exception as e:
-            print(f"❌ Database query error: {e}")
+            print(f"Database query error: {e}")
             return None if find_one else []
         
     def get_nested_keys(self, collection, key, value, field_name):

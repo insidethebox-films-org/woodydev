@@ -7,6 +7,7 @@ from ..widgets import CTkListbox
 import customtkinter as ctk
 import subprocess
 import platform
+from PIL import Image
 
 class PublishesFrame:
     def __init__(self, parent):
@@ -58,10 +59,14 @@ class PublishesFrame:
             return
         
         self.publishes_list_box.configure(state="normal")
+
+        pil_image = Image.open("/Users/oscar/Documents/GitHub/woodydev/woody/icons/tools/create_element.png")
+
+        icon = ctk.CTkImage(light_image=pil_image, size=(20, 20))
         
         # Populate the listbox
         for i, name in enumerate(publishes):
-            self.publishes_list_box.insert(i, name)
+            self.publishes_list_box.insert(i, name, icon=icon)
     
     def get_publish_versions(self, selected):
         
