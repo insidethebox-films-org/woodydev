@@ -36,15 +36,10 @@ class DirectoryInstance():
         self.folders = folders
 
     def normalise_path(self, path):
-
         return normalise_path(path)
 
-    def mount_drive(self, path):
-        
-        normalised = self.normalise_path(path)
-        
-        return mount_drive(path, normalised)
+    def mount_drive(self, normalised_path):
+        return mount_drive(normalised_path, normalised_path) 
 
     def create_folders_subfolders(self):
-
         create_folders_subfolders(self.mount, self.folders)

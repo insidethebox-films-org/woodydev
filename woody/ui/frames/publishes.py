@@ -4,6 +4,7 @@ from ...database.db_instance import DB_instance
 from ...tool.woody_instance import WoodyInstance
 from ..widgets import CTkListbox
 
+import os
 import customtkinter as ctk
 import subprocess
 import platform
@@ -32,6 +33,19 @@ class PublishesFrame:
         self.frame.grid_rowconfigure(1, weight=1)
         self.frame.grid_rowconfigure(3, weight=2)
         self.frame.grid_propagate(False)
+        
+    def load_icon(self, path, size):
+        image = Image.open(path)
+        original_width, original_height = image.size
+        
+        if original_width > original_height:
+            new_width = size
+            new_height = int((original_height * size) / original_width)
+        else:
+            new_height = size
+            new_width = int((original_width * size) / original_height)
+        
+        return image.resize((new_width, new_height), Image.LANCZOS)
     
     def get_publishes(self, new_browser_selection):
 
@@ -46,27 +60,42 @@ class PublishesFrame:
         if not new_browser_selection.get("element"):
             return
         
-        publishes = DB_instance().get_docs(
+        publishes_docs = DB_instance().get_docs(
             collection="publishes", 
             key=["source_asset"],
-            value=[new_browser_selection.get("element")], 
-            key_filter="custom_name"
-            )
+            value=[new_browser_selection.get("element")]
+        )
         
-        if not publishes:
+        
+        if not publishes_docs:
             self.publishes_list_box.insert("END", "No publishes found")
             self.publishes_list_box.configure(state="disabled")
             return
         
         self.publishes_list_box.configure(state="normal")
-
-        pil_image = Image.open("/Users/oscar/Documents/GitHub/woodydev/woody/icons/tools/create_element.png")
-
-        icon = ctk.CTkImage(light_image=pil_image, size=(20, 20))
         
-        # Populate the listbox
-        for i, name in enumerate(publishes):
-            self.publishes_list_box.insert(i, name, icon=icon)
+        for doc in publishes_docs:
+                publish_name = doc.get("custom_name", "Unknown")
+                publish_type = doc.get("publish_type", "OBJECT")
+            
+                icon_map = {
+                    "COLLECTION": "collection",
+                    "MATERIAL": "material",
+                    "NODE_GROUP": "node_group",
+                    "OBJECT": "object"
+                }
+                
+                image_type = icon_map.get(publish_type, "object")
+                
+                image_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "publishes", image_type + ".png")
+                
+                if os.path.exists(image_path):
+                    pil_image = self.load_icon(image_path, 20)
+                    icon = ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=pil_image.size)
+                else:
+                    icon = None
+                
+                self.publishes_list_box.insert("END", publish_name, icon=icon)
     
     def get_publish_versions(self, selected):
         

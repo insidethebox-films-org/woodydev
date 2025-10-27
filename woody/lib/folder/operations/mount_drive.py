@@ -46,4 +46,4 @@ def mount_drive(path, normalised):
             print(f"Mount verification failed: {mount}")
             return None
     
-    return path.replace("\\", "/")
+    return normalised
