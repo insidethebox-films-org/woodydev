@@ -1,11 +1,14 @@
 from .. import style
 from ...tool.event_bus import event_bus
+from ...database.db_instance import DB_instance
+from ...tool.woody_instance import WoodyInstance
 from ..widgets import CTkListbox
-from ...lib.mongodb.get_publish_doc import get_publish_doc, get_publish_versions
 
+import os
 import customtkinter as ctk
 import subprocess
 import platform
+from PIL import Image
 
 class PublishesFrame:
     def __init__(self, parent):
@@ -30,6 +33,19 @@ class PublishesFrame:
         self.frame.grid_rowconfigure(1, weight=1)
         self.frame.grid_rowconfigure(3, weight=2)
         self.frame.grid_propagate(False)
+        
+    def load_icon(self, path, size):
+        image = Image.open(path)
+        original_width, original_height = image.size
+        
+        if original_width > original_height:
+            new_width = size
+            new_height = int((original_height * size) / original_width)
+        else:
+            new_height = size
+            new_width = int((original_width * size) / original_height)
+        
+        return image.resize((new_width, new_height), Image.LANCZOS)
     
     def get_publishes(self, new_browser_selection):
 
@@ -38,31 +54,57 @@ class PublishesFrame:
         
         self.get_publish_button.configure(state="disabled")
         
-        if not new_browser_selection:
+        if len(new_browser_selection) < 3:
             return
         
         if not new_browser_selection.get("element"):
             return
         
-        elements = get_publish_doc()
+        publishes_docs = DB_instance().get_docs(
+            collection="publishes", 
+            key=["source_asset"],
+            value=[new_browser_selection.get("element")]
+        )
         
-        if not elements:
+        
+        if not publishes_docs:
             self.publishes_list_box.insert("END", "No publishes found")
             self.publishes_list_box.configure(state="disabled")
             return
         
         self.publishes_list_box.configure(state="normal")
         
-        # Populate the listbox
-        for i, element in enumerate(elements):
-            name = element.get("custom_name", "Unnamed")
-            self.publishes_list_box.insert(i, name)
+        for doc in publishes_docs:
+                publish_name = doc.get("custom_name", "Unknown")
+                publish_type = doc.get("publish_type", "OBJECT")
+            
+                icon_map = {
+                    "COLLECTION": "collection",
+                    "MATERIAL": "material",
+                    "NODE_GROUP": "node_group",
+                    "OBJECT": "object"
+                }
+                
+                image_type = icon_map.get(publish_type, "object")
+                
+                image_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "publishes", image_type + ".png")
+                
+                if os.path.exists(image_path):
+                    pil_image = self.load_icon(image_path, 20)
+                    icon = ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=pil_image.size)
+                else:
+                    icon = None
+                
+                self.publishes_list_box.insert("END", publish_name, icon=icon)
     
     def get_publish_versions(self, selected):
-    
-        docs = get_publish_doc()
-        publish_name = selected
-        versions = get_publish_versions(docs, publish_name)
+        
+        versions = DB_instance().get_nested_keys(
+            collection="publishes",
+            key="custom_name",
+            value=selected,
+            field_name="published_versions"
+        )
         
         self.publish_version_list_box.delete(0, "END")
         
@@ -87,6 +129,7 @@ class PublishesFrame:
             self.publish_version_list_box.insert(i, version)
      
     def on_version_selected(self, selected):
+        
         if selected:
             self.get_publish_button.configure(state="normal")
         else:
@@ -94,10 +137,17 @@ class PublishesFrame:
         
     def copy_publish_id(self):
         
-        docs = get_publish_doc()
-        doc = next((d for d in docs if d["custom_name"] == self.publishes_list_box.get()), None)
+        browser_selection = WoodyInstance().browser_selection().get("element")
+        
+        publish_id = DB_instance().get_docs(
+            collection="publishes",
+            key=["custom_name", "source_asset"],
+            value=[self.publishes_list_box.get(), browser_selection],
+            key_filter="publish_id",
+            find_one=True
+        )
+  
         version = self.publish_version_list_box.get()
-        publish_id = doc.get("publish_id")
         
         text = f"{publish_id}#ver:{version}"
     
@@ -111,7 +161,6 @@ class PublishesFrame:
             subprocess.run("xclip -selection clipboard", shell=True, text=True, input=text)
             
         print("Publish id copied to clipboard!")
-
             
     def create_widgets(self):
     

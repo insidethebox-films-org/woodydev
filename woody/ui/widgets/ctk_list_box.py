@@ -230,9 +230,8 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
         selected = list(self.buttons.keys())[index]
         self.deselect(selected)
 
-    def insert(self, index, option, update=True, **args):
-        """add new option in the listbox"""
-
+    def insert(self, index, option, icon=None, update=True, **args):
+        
         if str(index).lower() == "end":
             index = f"END{self.end_num}"
             self.end_num += 1
@@ -243,6 +242,8 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
         self.buttons[index] = customtkinter.CTkButton(
             self,
             text=option,
+            image=icon,             # optional icon
+            compound="left",        # icon on left, text on right
             fg_color=self.button_fg_color,
             anchor=self.justify,
             text_color=self.text_color,
@@ -250,7 +251,9 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
             hover_color=self.hover_color,
             **args,
         )
+
         self.buttons[index].configure(command=lambda num=index: self.select(num))
+
         self.buttons[index]._text_label.config(anchor="w")
         if self.wraplength:
             self.buttons[index]._text_label.config(wraplength=self.wraplength)
@@ -268,12 +271,12 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
                 "<Shift-1>", lambda e: self.select_multiple(self.buttons[index])
             )
 
-        # Apply stored bindings to the new button
         for key, funcs in self.bindings.items():
             for func, add in funcs:
                 self.buttons[index].bind(key, lambda e, f=func: f(e), add=add)
 
         return self.buttons[index]
+
         
     def select_multiple(self, button):
         selections = list(self.buttons.values())

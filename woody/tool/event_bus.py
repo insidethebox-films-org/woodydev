@@ -9,9 +9,6 @@ class EventBus:
         
         self.listeners[event_name].append(callback)
         
-        callback_name = f"{callback.__self__.__class__.__name__}.{callback.__name__}" if hasattr(callback, '__self__') else callback.__name__
-        print(f"Subscribed {callback_name} to '{event_name}'")
-    
     def publish(self, event_name, data=None):
         if event_name in self.listeners:
             for callback in self.listeners[event_name]:

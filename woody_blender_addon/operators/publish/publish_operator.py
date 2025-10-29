@@ -3,6 +3,7 @@ from pathlib import Path
 
 from .element_gatherers import ElementGatherer
 from .db_handler import PublishDatabaseHandler
+from ...utils.publish_utils import to_project_relative
 
 def on_publish_type_changed(self, context):
     """Called when publish type changes - refresh the existing names"""
@@ -21,11 +22,11 @@ def on_custom_name_changed(self, context):
 
 def on_suggestion_selected(self, context):
     """Called when user selects a suggestion from the dropdown"""
-    if hasattr(self, 'name_suggestions') and self.name_suggestions != "NONE":
-        # Copy the selected suggestion to the custom_name field
-        self.custom_name = self.name_suggestions
-        # Reset the suggestion dropdown
-        self.name_suggestions = "NONE"
+    if hasattr(self, 'name_suggestions'):
+        selected = self.name_suggestions
+        
+        if selected not in ["NONE", "ERROR"]:
+            self.custom_name = selected
 
 def get_filtered_suggestions_callback(self, context):
     """Get suggestions filtered by current custom_name input"""
@@ -355,13 +356,15 @@ class WOODY_OT_publish(bpy.types.Operator):
             # Remove old latest path if it exists and is different
             old_latest_key = None
             for key, value in blend_files.items():
-                if value == "latest" and key != latest_path:
+                if value == "latest" and key != to_project_relative(latest_path):
                     old_latest_key = key
                     break
 
-            # Update blend_files dictionary
-            blend_files[version_path] = version_number
-            blend_files[latest_path] = "latest"
+            # Update blend_files dictionary (convert to relative paths)
+            relative_version_path = to_project_relative(version_path)
+            relative_latest_path = to_project_relative(latest_path)
+            blend_files[relative_version_path] = version_number
+            blend_files[relative_latest_path] = "latest"
             
             # Remove old latest if found
             if old_latest_key:

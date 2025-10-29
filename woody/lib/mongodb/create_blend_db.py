@@ -1,5 +1,3 @@
-from ...plugins.blender.blender_instance import BlenderInstance
-from ...tool.woody_instance import WoodyInstance
 from ...database.db_instance import DB_instance
 from ...database.templates.blend import blend_template
 
@@ -19,7 +17,6 @@ def create_blend_db(group_type, group_name, element_name, blend_name):
     """
     
     db = DB_instance()
-    blend = BlenderInstance()
     
     # Find the element document to get its ID
     element = db.connect[group_type].find_one({"name": element_name})
@@ -39,8 +36,8 @@ def create_blend_db(group_type, group_name, element_name, blend_name):
         print(f"Error: Invalid group_type '{group_type}'")
         return False
 
-    blend_name_with_latest = f"{blend_name}_latest"
-    blend_path = blend.get_blend_path(group_type, group_name, element_name, blend_name_with_latest)
+    blend_name_with_latest = f"{blend_name}_latest.blend"
+    blend_path = f"{group_type}\{group_name}\{element_name}\{blend_name_with_latest}"
     collection_name = "blends"
     
     # Check if document with the same name and element id already exists

@@ -12,7 +12,7 @@ class CreateProjectWindow:
     def __init__(self, parent):
         self.window = ctk.CTkToplevel(parent)
         self.window.title("Create Project")
-        self.window.geometry("300x225")
+        self.window.geometry("300x275")
         
         self.window.transient(parent) 
         self.window.grab_set()
@@ -38,19 +38,18 @@ class CreateProjectWindow:
         self.create_widgets()
         
     def create_project(self):
-        # Save project preferences and get project name
-        # project_name = save_settings_json(
-        #     project_name=self.projectNameEntry.get(),
-        #     project_directory=self.projectDirectoryEntry.get(),
-        # )
         project_name=self.projectNameEntry.get().strip()
+        project_host_address=self.projectHostAddressEntry.get().strip()
         project_directory=self.projectDirectoryEntry.get().strip()
         
         # Create project folders and database
         print("Project name:", project_name)
         print("Project directory:", project_directory) #TODO creates folders in wrong location
-        create_project_db(project_name, project_directory)
-        create_project_fd(project_name, project_directory)
+        if create_project_db(project_name, project_host_address, project_directory):
+            create_project_fd(project_name)
+        else:
+            print(f"Error: Project creation failed, database already exists for {project_name}")
+            return
 
         # Install Blender libraries
         blender_executable_path = WoodyInstance().blenderExecutable.strip()
@@ -96,20 +95,35 @@ class CreateProjectWindow:
             )
         self.projectNameEntry.grid(row=3, column=0, sticky="new", padx=8, columnspan=2)
         
+        # Project host address label
+        self.projectHostAddressLabel = ctk.CTkLabel(
+            self.frame, 
+            text="Host Address",
+            **style.BODY_LABEL
+        )
+        self.projectHostAddressLabel.grid(row=4, column=0, sticky="nw", padx=8)
+
+        # Project host address entry
+        self.projectHostAddressEntry = ctk.CTkEntry(
+            self.frame,
+            height=25
+            )
+        self.projectHostAddressEntry.grid(row=5, column=0, sticky="new", padx=8, columnspan=2)
+        
         # Project directory label
         self.projectDirectoryLabel = ctk.CTkLabel(
             self.frame, 
             text="Project Directory",
             **style.BODY_LABEL
         )
-        self.projectDirectoryLabel.grid(row=4, column=0, sticky="nw", padx=8)
+        self.projectDirectoryLabel.grid(row=6, column=0, sticky="nw", padx=8)
 
         # Project name entry
         self.projectDirectoryEntry = ctk.CTkEntry(
             self.frame,
             height=25
             )
-        self.projectDirectoryEntry.grid(row=5, column=0, sticky="new", padx=8, columnspan=2)
+        self.projectDirectoryEntry.grid(row=7, column=0, sticky="new", padx=8, columnspan=2)
         
         # Create project button
         self.createProjectButton = ctk.CTkButton(
@@ -119,7 +133,7 @@ class CreateProjectWindow:
             
             command=self.create_project
         )
-        self.createProjectButton.grid(row=6, column=0, sticky="nwe", padx=8, pady=8)
+        self.createProjectButton.grid(row=8, column=0, sticky="nwe", padx=8, pady=8)
     
     def run(self):
         self.window.wait_window()

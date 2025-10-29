@@ -1,20 +1,14 @@
 from .directory_instance import DirectoryInstance
-from ...tool import WoodyInstance
-from ...database.db_instance import DB_instance
 
 def create_element_fd(groupTypeCombo, groupName, elementName):
-    
-    woody = WoodyInstance()
-    db = DB_instance() 
-    
+      
     group_type = "assets" if groupTypeCombo == "Assets Group" else "shots"
-    
-    base_path = db.projectDirectory / woody.projectName / group_type / groupName
+
+    dirInstance = DirectoryInstance()
+    base_path = dirInstance.root_path / group_type / groupName
     
     folders = {
        elementName: [],
     }
-    
-    DirectoryInstance(base_path, folders).create_folders_subfolders()
-    
+    dirInstance.create_folders_subfolders(base_path, folders)
     

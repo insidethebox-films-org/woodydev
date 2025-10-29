@@ -147,7 +147,7 @@ class WOODY_OT_delete_publish(bpy.types.Operator):
 
             if deleted_items:
                 items_str = ", ".join(deleted_items)
-                self.report({'INFO'}, f"🗑️ Deleted: {items_str}")
+                self.report({'INFO'}, f"Deleted: {items_str}")
                 
                 # Refresh the display
                 bpy.ops.woody.refresh_loaded_publishes()
@@ -166,7 +166,7 @@ class WOODY_OT_delete_publish(bpy.types.Operator):
                     bpy.ops.woody.refresh_loaded_publishes()
                 except:
                     pass
-                self.report({'INFO'}, "🗑️ Deleted successfully")
+                self.report({'INFO'}, "Deleted successfully")
                 return {'FINISHED'}
             else:
                 self.report({'ERROR'}, f"Delete failed: {str(e)}")

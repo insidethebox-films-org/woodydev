@@ -1,84 +1,107 @@
 import subprocess
-import sys
+import platform
 from pathlib import Path
 
-def install_blender_libraries(blender_executable_path: str) -> bool:
-    """Install required libraries into Blender's Python environment"""
-    try:
-        # Get Blender's Python executable path
-        blender_path = Path(blender_executable_path)
-        
-        if sys.platform == "win32":
-            python_exe = blender_path / "4.2" / "python" / "bin" / "python.exe"  #TODO - make version dynamic -ie "4.2"
+def get_python_path(blender_path):
+    
+    """
+    Returns the path to Blender's bundled Python executable and its site-packages directory.
+    Works on macOS, Windows, and Linux, automatically detecting the Blender version folder.
+    """
+    system = platform.system()
+    blender_path = Path(blender_path)
+
+    # --- macOS ---
+    if system == "Darwin":
+        if ".app" in blender_path.parts:
+            app_index = blender_path.parts.index(next(p for p in blender_path.parts if p.endswith(".app")))
+            blender_path = Path(*blender_path.parts[:app_index + 1])
         else:
-            python_exe = blender_path / "python" / "bin" / "python"  #TODO check Mac path
+            while blender_path and blender_path.name != "Blender.app":
+                blender_path = blender_path.parent
+
+        resources = blender_path / "Contents" / "Resources"
+        version_dirs = [d for d in resources.iterdir() if (d / "python").exists()]
+
+    # --- Windows ---
+    elif system == "Windows":
+        resources = blender_path
+        version_dirs = [d for d in resources.iterdir() if (d / "python" / "bin" / "python.exe").exists()]
+
+    # --- Linux ---
+    else:
+        resources = blender_path
+        version_dirs = [d for d in resources.iterdir() if (d / "python" / "bin").exists()]
+
+    if not version_dirs:
+        print(f"No Blender version folder with Python found in {resources}")
+        return None, None
+
+    version_dirs.sort(reverse=True)
+    version_dir = version_dirs[0]
+    python_root = version_dir / "python"
+    python_bin = python_root / "bin"
+
+    if system == "Windows":
+        python_exe = python_bin / "python.exe"
+    else:
+        python_exe = next(python_bin.glob("python3.*"), python_bin / "python3")
+
+    try:
+        result = subprocess.run(
+            [str(python_exe), "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"],
+            capture_output=True, text=True, check=True
+        )
+        py_version = result.stdout.strip()
+    except Exception:
+        py_version = "3.11"
+
+    if system == "Windows":
+        site_packages = python_root / "Lib" / "site-packages"
+    else:
+        site_packages = python_root / "lib" / f"python{py_version}" / "site-packages"
+
+    return python_exe, site_packages
+
+
+def install_blender_libraries(blender_executable_path: str) -> bool:
+    
+    blender_path = Path(blender_executable_path)
+    python_exe, site_packages = get_python_path(blender_path)
+    
+    if not python_exe or not python_exe.exists():
+        print(f"Error: Blender Python not found at {python_exe}")
+        return False
+    
+    print(f"Installing to: {python_exe}")
+    print(f"Target: {site_packages}")
+    
+    libraries = ["pymongo"]
+    
+    for library in libraries:
+        print(f"\nInstalling {library}...")
         
-        if not python_exe.exists():
-            print(f"Error: Blender Python executable not found at {python_exe}")
+        result = subprocess.run([
+            str(python_exe), "-m", "pip", "install",
+            "--target", str(site_packages),
+            "--force-reinstall",
+            library
+        ], capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            print(f"Error: {result.stderr}")
             return False
         
-        print(f"Installing to Blender Python: {python_exe}")
+        verify = subprocess.run([
+            str(python_exe), "-c",
+            f"import sys; sys.path.insert(0, r'{site_packages}'); "
+            f"import {library}; print('SUCCESS')"
+        ], capture_output=True, text=True)
         
-        # Get the target site-packages directory
-        site_packages_path = python_exe.parent.parent / "Lib" / "site-packages"  # Note: capital "Lib" #TODO might be different on Linux/Mac
-        print(f"Target site-packages: {site_packages_path}")
+        if verify.returncode == 0:
+            print(f"✓ {library} installed successfully")
+        else:
+            print(f"✗ Verification failed: {verify.stderr}")
+            return False
         
-        # Install required libraries
-        libraries = ["pymongo"]
-        
-        for library in libraries:
-            print(f"Installing {library} directly to Blender's site-packages...")
-            
-            # Force installation to specific target directory
-            result = subprocess.run([
-                str(python_exe), "-m", "pip", "install", 
-                "--target", str(site_packages_path),
-                "--force-reinstall", 
-                "--no-deps",  # Install without dependencies first
-                library
-            ], capture_output=True, text=True)
-            
-            print(f"Installation output: {result.stdout}")
-            if result.stderr:
-                print(f"Installation errors: {result.stderr}")
-            
-            # Now install with dependencies
-            if result.returncode == 0:
-                print(f"Installing {library} dependencies...")
-                deps_result = subprocess.run([
-                    str(python_exe), "-m", "pip", "install", 
-                    "--target", str(site_packages_path),
-                    "--force-reinstall",
-                    library
-                ], capture_output=True, text=True)
-                
-                print(f"Dependencies output: {deps_result.stdout}")
-            
-            # Verify installation in correct location
-            verify_result = subprocess.run([
-                str(python_exe), "-c", 
-                f"""
-import sys
-sys.path.insert(0, r'{site_packages_path}')
-import {library}
-print('SUCCESS: {library} installed correctly')
-print('Version:', {library}.version)  #TODO not all libraries may have version attribute
-print('Location:', {library}.__file__)
-"""
-            ], capture_output=True, text=True)
-            
-            if verify_result.returncode == 0:
-                print(f"✓ {library} successfully installed in Blender!")
-                print(verify_result.stdout)
-            else:
-                print(f"✗ Verification failed: {verify_result.stderr}")
-                return False
-        
-        print("All libraries successfully installed in Blender's Python!")
-        return True
-        
-    except Exception as e:
-        print(f"Error installing Blender libraries: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return False
+    return True

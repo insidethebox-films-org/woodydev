@@ -4,10 +4,12 @@ Handles loading published assets using publish ID and version.
 """
 
 import bpy
+import platform
 from pathlib import Path
 from ...utils.get_db_connection import get_database_connection
 from ...utils.asset_loaders import load_by_type
 from ...utils.publish_utils import refresh_loaded_publishes_data
+from ...utils.publish_utils import to_absolute_path
 
 
 class WOODY_OT_load_publish(bpy.types.Operator):
@@ -112,14 +114,14 @@ class WOODY_OT_load_publish(bpy.types.Operator):
             
             # Return combined information
             result = {
-                "file_path": version_info.get("published_path", ""),
+                "file_path": to_absolute_path(version_info.get("published_path", "")),
                 "publish_type": publish_doc.get("publish_type", ""),
                 "custom_name": publish_doc.get("custom_name", ""),
                 "source_asset": publish_doc.get("source_asset", ""),
                 "version": version,
                 "publish_id": publish_id
             }
-            
+
             client.close()
             return result
             
