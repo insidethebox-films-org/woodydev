@@ -139,17 +139,14 @@ class ScenesFrame:
                 group_type,
                 group_selection, 
                 element_selection,
-                blend_selection,
-                "latest"
-                
-            )
+                f"{blend_selection}_latest.blend",
+            )   
         else:
             blender.open_file(
                 group_type,
                 group_selection, 
                 element_selection,
-                blend_selection,
-                version_selection
+                f"{blend_selection}_{version_selection}.blend",
             )
             
     def create_widgets(self):

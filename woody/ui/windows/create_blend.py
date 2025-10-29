@@ -71,7 +71,7 @@ class CreateBlendWindow:
             return
         
         # Append _latest to the blend name for file creation
-        blend_name_with_latest = f"{blend_name}_latest"
+        blend_name_with_latest = f"{blend_name}_latest.blend"
         group_type = "assets" if group_type_selection == "Assets Group" else "shots"
         
         # Try to create the database entry first

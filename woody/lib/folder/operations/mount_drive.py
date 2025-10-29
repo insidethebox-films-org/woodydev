@@ -2,25 +2,19 @@ import platform
 import os
 import subprocess
 
-def mount_drive(path, normalised):
+def mount_drive(host_address, location):
     
     current_os = platform.system()
 
-    if normalised.startswith('//') and current_os == 'Darwin':
-    
-        parts = normalised[2:].split('/', 2)
-        if len(parts) < 2:
-            print(f"{normalised}: is not a valid smb path")
-            return None
-            
-        server = parts[0]
-        share = parts[1]
+    if current_os == 'Darwin':
+        host_address = host_address.replace('\\', '/')
+        location = location.replace('\\', '/')
         
         # Mount point
-        mount = f"/Volumes/{share}"
+        mount = f"/Volumes/{location}"
         
         if not os.path.ismount(mount):
-            smb_url = f"smb://{server}/{share}"
+            smb_url = f"smb://{host_address}/{location}"
             print(f"Mounting {smb_url} to {mount}...")
 
             result = subprocess.run(
@@ -32,18 +26,18 @@ def mount_drive(path, normalised):
             )
             if result.returncode != 0:
                 print(f"Warning: Could not mount {smb_url}: {result.stderr}")
-                return None
-
-        # Verify mount
-        if os.path.ismount(mount):
-            if len(parts) >= 3:
-                subdirectory = parts[2]
-                full_path = os.path.join(mount, subdirectory)
-                return full_path
+                return False
+            
+            # Verify the mount was successful
+            if os.path.ismount(mount):
+                print(f"Successfully mounted {smb_url}")
+                return True
             else:
-                return mount
+                print(f"Mount verification failed: {mount}")
+                return False
         else:
-            print(f"Mount verification failed: {mount}")
-            return None
-    
-    return normalised
+            print(f"Drive already mounted at {mount}")
+            return True
+    else:
+        print(f"Mounting not supported on {current_os}, skipping...")
+        return False

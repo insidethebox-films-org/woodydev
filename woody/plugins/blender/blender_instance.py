@@ -2,6 +2,7 @@ import os
 
 from ...tool.woody_instance import WoodyInstance
 from ...database.db_instance import DB_instance
+from ...lib.folder.directory_instance import DirectoryInstance
 from .operations import *
 
 class BlenderInstance:
@@ -19,33 +20,19 @@ class BlenderInstance:
         if not self.executable or not os.path.exists(self.executable):
             print(f"Invalid Blender executable path: {self.executable}")
             return False
-
-        blend_path = get_blend_path(
-            str(self.db.projectDirectory),
-            str(self.woody.projectName),
-            group_type,
-            group_name,
-            element_name,
-            blend_name,
-        )
+        
+        blend_path = DirectoryInstance().construct_path([group_type, group_name, element_name, blend_name])
         
         return create_blend_file(self.executable, blend_path)
 
-    def open_file(self, group_type: str, group_name: str, element_name: str, blend_name: str, version: str) -> bool:
+    def open_file(self, group_type: str, group_name: str, element_name: str, blend_name: str) -> bool:
         """Opens existing blend file with addon update check"""
         if not self.executable or not os.path.exists(self.executable):
             print(f"Invalid Blender executable path: {self.executable}")
             return False
         
-        blend_path = get_blend_path(
-            str(self.db.projectDirectory),
-            str(self.woody.projectName),
-            group_type,
-            group_name,
-            element_name,
-            blend_name,
-            version
-        )
+        blend_path = DirectoryInstance().construct_path([group_type, group_name, element_name, blend_name])
+        print(blend_path)
         
         return open_blend_file(self.executable, blend_path, self.addon_zip)
     
@@ -53,13 +40,13 @@ class BlenderInstance:
         """Updates the addon zip file for development"""
         return update_zip_dev(self.addon_zip)
     
-    def get_blend_path(self, group_type: str, group_name: str, element_name: str, blend_name: str) -> str:
-        """Gets the blend file path for given parameters"""
-        return get_blend_path(
-            str(self.db.projectDirectory),
-            str(self.woody.projectName),
-            group_type,
-            group_name,
-            element_name,
-            blend_name,
-        )
+    # def get_blend_path(self, group_type: str, group_name: str, element_name: str, blend_name: str) -> str:
+    #     """Gets the blend file path for given parameters"""
+    #     return get_blend_path(
+    #         str(self.db.projectDirectory),
+    #         str(self.woody.projectName),
+    #         group_type,
+    #         group_name,
+    #         element_name,
+    #         blend_name,
+    #     )

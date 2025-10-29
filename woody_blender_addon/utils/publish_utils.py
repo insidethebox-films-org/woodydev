@@ -4,8 +4,120 @@ Contains common functions used across multiple operators.
 """
 
 import bpy
+from pathlib import Path
 from .get_db_connection import get_database_connection
 
+
+def to_project_relative(absolute_path: str) -> str:
+    """
+    Convert an absolute path to a project-relative path using project name from Blender prefs.
+    
+    Example:
+        Input: "\\\\100.113.50.90\\projects\\PUD\\dev\\FlxAV_woody2Proj\\assets\\CnB\\cok\\aaa_latest.blend"
+        Output: "assets\\CnB\\cok\\aaa_latest.blend"
+    
+    Args:
+        absolute_path: Full absolute path string
+        
+    Returns:
+        Project-relative path with backslashes, or original path if conversion fails
+    """
+    try:
+        # Get project name from addon preferences
+        addon_prefs = bpy.context.preferences.addons["woody_blender_addon"].preferences
+        project_name = addon_prefs.project_name
+        
+        if not project_name:
+            return absolute_path
+        
+        # Find the project name in the path and take everything after it
+        path_str = str(absolute_path)
+        
+        # Look for the project name followed by a path separator
+        project_markers = [
+            f"\\{project_name}\\",
+            f"/{project_name}/",
+            f"\\{project_name}/",
+            f"/{project_name}\\"
+        ]
+        
+        for marker in project_markers:
+            if marker in path_str:
+                # Split at the marker and take everything after it
+                parts = path_str.split(marker, 1)
+                if len(parts) == 2:
+                    relative_part = parts[1]
+                    # Normalize to backslashes for consistency
+                    return relative_part.replace('/', '\\')
+        
+        # If project name not found, return original path
+        return absolute_path
+        
+    except Exception as e:
+        print(f"Error converting to project relative path: {e}")
+        return absolute_path
+
+def to_absolute_path(project_relative_path: str) -> str:
+    """
+    Convert a project-relative path to an absolute path using database settings.
+    
+    Example:
+        Input: "assets\\CnB\\cok\\aaa_latest.blend"
+        Output (Windows): "\\\\100.113.50.90\\projects\\PUD\\dev\\FlxAV_woody2Proj\\assets\\CnB\\cok\\aaa_latest.blend"
+        Output (Mac): "/Volumes/projects/PUD/dev/FlxAV_woody2Proj/assets/CnB/cok/aaa_latest.blend"
+    
+    Args:
+        project_relative_path: Project-relative path string
+        
+    Returns:
+        Absolute path for current OS, or original path if conversion fails
+    """
+    try:
+        import platform
+        from .get_db_connection import get_database_connection
+        
+        # Get database connection
+        client, db, error = get_database_connection()
+        if error or client is None or db is None:
+            print(f"Database connection failed: {error}")
+            return project_relative_path
+        
+        current_os = platform.system()
+        
+        # Get project settings from database
+        settings = db["settings"].find_one({"project_name": {"$exists": True}})
+        
+        if not settings:
+            print("No project settings found in database")
+            client.close()
+            return project_relative_path
+        
+        host_address = settings.get("host_address")
+        location = settings.get("location", "")
+        project_name = settings.get("project_name", "")
+        
+        client.close()
+        
+        if not all([host_address, location, project_name]):
+            print(f"Missing required settings: host_address={host_address}, location={location}, project_name={project_name}")
+            return project_relative_path
+        
+        # Build absolute path based on OS
+        if current_os == "Darwin":
+            # Mac: /Volumes/location/project_name/relative_path
+            absolute_path = f"/Volumes/{location}/{project_name}/{project_relative_path}".replace('\\', '/')
+        elif current_os == "Windows":
+            # Windows: \\host_address\location\project_name\relative_path
+            absolute_path = f"\\\\{host_address}\\{location}\\{project_name}\\{project_relative_path}"
+        else:
+            print(f"Warning: Unsupported OS: {current_os}, returning original path.")
+            return project_relative_path
+        
+        return absolute_path
+        
+    except Exception as e:
+        print(f"Error converting to absolute path: {e}")
+        return project_relative_path
 
 def get_override_status(library_path: str) -> str:
     """

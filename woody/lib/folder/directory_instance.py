@@ -1,45 +1,51 @@
-from .operations import create_folders_subfolders
+from ...database.db_instance import DB_instance
 from .operations import mount_drive
-from .operations import normalise_path
+from .operations import create_folders_subfolders
 
+import platform
 from pathlib import Path
 
 class DirectoryInstance():
-    """
-    This class abstracts the process of:
-      - Normalizing paths across platforms.
-      - Mounting remote SMB network drives on macOS.
-      - Creating nested folder structures on a mounted or local path.
 
-    Attributes
-    ----------
-    path : str
-        The original input path provided during initialization.
-    normalised : str
-        The normalized version of the path (with consistent separators and SMB handling).
-    mount : str or None
-        The mounted drive path if applicable, otherwise the normalized local path.
-    folders : dict or None
-        A dictionary defining the folder structure to create, where keys are folder names
-        and values can be lists or nested dicts of subfolders.
-    """
-
-    def __init__(self, path, folders=None):
-
-        if isinstance(path, Path):
-            self.path = str(path)
+    def __init__(self, project_name=None):
+        
+        if project_name:
+            settings = DB_instance(project_name).get_docs(collection="settings")[0]
         else:
-            self.path = path
-            
-        self.normalised = self.normalise_path(self.path)
-        self.mount = self.mount_drive(self.normalised)
-        self.folders = folders
+            settings = DB_instance().get_docs(collection="settings")[0]
+        
+        self.project_name = settings.get("project_name")
+        self.host_address = settings.get("host_address")
+        self.location = settings.get("location")
+        
+        self.mount_local_drive(self.host_address, self.location)
+        
+        self.root_path = self.get_root_path(self.host_address, self.location,  self.project_name)
 
-    def normalise_path(self, path):
-        return normalise_path(path)
+    def get_root_path(self, host_address, location, project_name):
 
-    def mount_drive(self, normalised_path):
-        return mount_drive(normalised_path, normalised_path) 
+        current_os = platform.system()
 
-    def create_folders_subfolders(self):
-        create_folders_subfolders(self.mount, self.folders)
+        if current_os == 'Darwin':
+            return Path(f"/Volumes/{location}/{project_name}/".replace('\\', '/'))
+        elif platform.system() == "Windows":
+            return Path(f"\\\{host_address}\\{location}\\{project_name}\\")
+        else:
+            print("System not recognized")
+            return None
+        
+    def construct_path(self, subfolders=[]):
+    
+        path = self.root_path
+        
+        for i in subfolders:
+            path = path / i
+        
+        return path
+    
+    def mount_local_drive(self, host_address, location):
+        return mount_drive(host_address, location) 
+
+    def create_folders_subfolders(self, base_path, folders):
+        return create_folders_subfolders(base_path, folders)
+

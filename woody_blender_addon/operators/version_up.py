@@ -5,6 +5,7 @@ import shutil
 
 from pathlib import Path
 from ..utils.get_db_connection import get_database_connection
+from ..utils.publish_utils import to_project_relative
 
 class WOODY_OT_version_up(bpy.types.Operator):
     bl_idname = "woody.version_up"
@@ -65,7 +66,7 @@ class WOODY_OT_version_up(bpy.types.Operator):
                 if backup_file.exists():
                     os.remove(backup_file)
             
-            # Update database with new version info
+            # Update database with new version info (using relative paths)
             self.update_database(base_filename, str(new_file_path), str(new_latest_path), next_version)
             
             print(f"Created version: {new_file_path}")
@@ -124,16 +125,18 @@ class WOODY_OT_version_up(bpy.types.Operator):
             # Remove old latest path if it exists and is different
             old_latest_key = None
             for key, value in blend_files.items():
-                if value == "latest" and key != latest_path:
+                if value == "latest" and key != to_project_relative(latest_path):
                     old_latest_key = key
                     break
 
             if old_latest_key:
                 print(f"DEBUG - Removing old latest key: {old_latest_key}")
 
-            # Update blend_files dictionary
-            blend_files[version_path] = version_number
-            blend_files[latest_path] = "latest"
+            # Update blend_files dictionary (convert to relative paths)
+            relative_version_path = to_project_relative(version_path)
+            relative_latest_path = to_project_relative(latest_path)
+            blend_files[relative_version_path] = version_number
+            blend_files[relative_latest_path] = "latest"
             
             # Remove old latest if found
             if old_latest_key:
@@ -158,8 +161,8 @@ class WOODY_OT_version_up(bpy.types.Operator):
             
             if result.modified_count > 0:
                 print(f"✓ Database updated successfully for blend '{blend_doc.get('name')}' - Version {version_number}")
-                print(f"  - Added version: {version_path} = {version_number}")
-                print(f"  - Updated latest: {latest_path} = 'latest'")
+                print(f"  - Added version: {relative_version_path} = {version_number}")
+                print(f"  - Updated latest: {relative_latest_path} = 'latest'")
                 if old_latest_key:
                     print(f"  - Removed old latest: {old_latest_key}")
                 

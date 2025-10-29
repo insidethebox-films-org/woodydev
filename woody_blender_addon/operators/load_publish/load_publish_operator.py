@@ -4,10 +4,12 @@ Handles loading published assets using publish ID and version.
 """
 
 import bpy
+import platform
 from pathlib import Path
 from ...utils.get_db_connection import get_database_connection
 from ...utils.asset_loaders import load_by_type
 from ...utils.publish_utils import refresh_loaded_publishes_data
+from ...utils.publish_utils import to_absolute_path
 
 
 class WOODY_OT_load_publish(bpy.types.Operator):
@@ -112,7 +114,7 @@ class WOODY_OT_load_publish(bpy.types.Operator):
             
             # Return combined information
             result = {
-                "file_path": version_info.get("published_path", ""),
+                "file_path": to_absolute_path(version_info.get("published_path", "")),
                 "publish_type": publish_doc.get("publish_type", ""),
                 "custom_name": publish_doc.get("custom_name", ""),
                 "source_asset": publish_doc.get("source_asset", ""),
@@ -120,6 +122,23 @@ class WOODY_OT_load_publish(bpy.types.Operator):
                 "publish_id": publish_id
             }
             
+            # current_os = platform.system()
+            
+            # settings = db["settings"].find_one({"project_name": {"$exists": True}})
+            
+            # host_address = settings.get("host_address")
+            # location = settings.get("location", "")
+            # project_name = settings.get("project_name", "")
+            # published_path = version_info.get("published_path", "")
+            
+            # if current_os == "Darwin":
+            #     result["file_path"] = f"/Volumes/{location}/{project_name}/{published_path}".replace('\\', '/')
+            # elif current_os == "Windows":
+            #     result["file_path"] = f"\\\\{host_address}\\{location}\\{project_name}\\{published_path}"
+            # else:
+            #     print(f"Warning: Unsupported OS: {current_os}, using default path from DB.")
+
+
             client.close()
             return result
             

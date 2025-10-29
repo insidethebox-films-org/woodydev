@@ -1,8 +1,7 @@
-from ....lib.folder.directory_instance import DirectoryInstance
 from ....tool.woody_instance import WoodyInstance
 
 import subprocess
-from pathlib import Path
+import os
 
 def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
     """
@@ -21,14 +20,10 @@ def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
         woody_instance = WoodyInstance()
         mongo_address = woody_instance.mongoDBAddress or ""
         project_name = woody_instance.projectName or ""
-
-        dir_instance = DirectoryInstance(blend_path)
-        mounted_path = dir_instance.mount or blend_path
-
-        mounted_dir = Path(mounted_path).parent
-        mounted_dir.mkdir(parents=True, exist_ok=True)
         
-        startup_path = mounted_dir / "_woody_startup.py"
+        blend_path = str(blend_path)
+        blend_dir = os.path.dirname(blend_path)
+        startup_path = os.path.join(blend_dir, "_woody_startup.py")
 
         startup_script = f"""
 import bpy
@@ -132,13 +127,15 @@ try:
 except:
     pass
 """
-        
-        startup_path.write_text(startup_script, encoding='utf-8')
+
+        os.makedirs(blend_dir, exist_ok=True)
+        with open(startup_path, 'w', encoding='utf-8') as f:
+            f.write(startup_script)
         
         subprocess.Popen([
             executable,
-            str(mounted_path),
-            "--python", str(startup_path)
+            str(blend_path),
+            "--python", startup_path 
         ])
 
         return True

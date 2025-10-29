@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ...utils.get_db_connection import get_database_connection
+from ...utils.publish_utils import to_project_relative
+from ...utils.publish_utils import to_absolute_path
 
 class PublishDatabaseHandler:
     """Handles database operations for publishing"""
@@ -138,6 +140,7 @@ class PublishDatabaseHandler:
 
     def version_latest_publish(self, publish_document, version_number: int):
         """Move the current 'latest' to a versioned entry within the same document"""
+       
         try:
             client, db, error = get_database_connection()
             if error or client is None or db is None:
@@ -146,24 +149,35 @@ class PublishDatabaseHandler:
             published_versions = publish_document.get("published_versions", {})
             
             if "latest" not in published_versions:
+                print("No 'latest' version found to version up")
                 return False, None
             
             latest_version = published_versions["latest"]
+            relative_published_path = latest_version["published_path"]
+            absolute_published_path = to_absolute_path(relative_published_path)
             
-            # Generate new file name for the versioned publish
-            old_path = Path(latest_version["published_path"])
+            old_path = Path(absolute_published_path)
+            
+            # Check if the file actually exists
+            if not old_path.exists():
+                print(f"WARNING: File does not exist at {old_path}")
+                # Continue anyway to update database
+        
+            # Generate new versioned filename
             old_name = old_path.stem  # filename without extension
             new_name = old_name.replace("_latest", f"_v{version_number}")
             new_path = old_path.parent / f"{new_name}.blend"
+
+            print(f"Renaming file from {old_path} to {new_path}")
             
             # Rename the actual blend file
             if old_path.exists():
                 old_path.rename(new_path)
                 print(f"Renamed file: {old_path.name} -> {new_path.name}")
             
-            # Move 'latest' to versioned entry and update the path
+            # Move 'latest' to versioned entry and update the path (store as relative)
             versioned_entry = latest_version.copy()
-            versioned_entry["published_path"] = str(new_path)
+            versioned_entry["published_path"] = to_project_relative(str(new_path))
             versioned_entry["versioned_time"] = datetime.now(timezone.utc)
             
             # Update the document: move latest to version number
@@ -192,9 +206,10 @@ class PublishDatabaseHandler:
                 print(f"Could not update database: {error}")
                 return False
 
+            # Store relative paths in database
             latest_version = {
-                "source_file": source_file,
-                "published_path": published_path,
+                "source_file": to_project_relative(source_file),
+                "published_path": to_project_relative(published_path),
                 "selected_item": selected_item,
                 "created_time": datetime.now(timezone.utc)
             }
