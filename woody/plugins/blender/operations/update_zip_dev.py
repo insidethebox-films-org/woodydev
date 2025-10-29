@@ -5,7 +5,7 @@ from pathlib import Path
 def update_zip_dev(addon_zip: str) -> bool:
     """Updates the addon zip file for development"""
     
-    addon_dir = Path(__file__).resolve().parent.parent.parent.parent.parent / "woody_blender_addon"
+    addon_dir = Path(__file__).resolve().parents[4] / "woody_blender_addon"
     
     print(f"Current file: {__file__}")
     print(f"Addon exists: {addon_dir.exists()}")
