@@ -121,23 +121,6 @@ class WOODY_OT_load_publish(bpy.types.Operator):
                 "version": version,
                 "publish_id": publish_id
             }
-            
-            # current_os = platform.system()
-            
-            # settings = db["settings"].find_one({"project_name": {"$exists": True}})
-            
-            # host_address = settings.get("host_address")
-            # location = settings.get("location", "")
-            # project_name = settings.get("project_name", "")
-            # published_path = version_info.get("published_path", "")
-            
-            # if current_os == "Darwin":
-            #     result["file_path"] = f"/Volumes/{location}/{project_name}/{published_path}".replace('\\', '/')
-            # elif current_os == "Windows":
-            #     result["file_path"] = f"\\\\{host_address}\\{location}\\{project_name}\\{published_path}"
-            # else:
-            #     print(f"Warning: Unsupported OS: {current_os}, using default path from DB.")
-
 
             client.close()
             return result
