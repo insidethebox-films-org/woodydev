@@ -111,7 +111,7 @@ class HeaderFrame:
             **style.SUB_HEADER_LABEL,
             text_color="#EBEBEB"
         )
-        self.project_label.grid(row=0, column=0, sticky="we", padx=(12,0))
+        self.project_label.grid(row=0, column=0, sticky="we", padx=(12,0), pady=(0,1))
         
         #Project picker combobox
         self.projectComboBox = ctk.CTkComboBox(
