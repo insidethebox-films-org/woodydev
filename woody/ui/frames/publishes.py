@@ -1,14 +1,10 @@
 from .. import style
 from ...tool.event_bus import event_bus
-from ...database.db_instance import DB_instance
-from ...tool.woody_instance import WoodyInstance
 from ..widgets import CTkListbox
 
-import os
+from .operations.publishes.get_lists import get_publishes_list, get_publish_versions_list
+
 import customtkinter as ctk
-import subprocess
-import platform
-from PIL import Image
 
 class PublishesFrame:
     def __init__(self, parent):
@@ -33,97 +29,39 @@ class PublishesFrame:
         self.frame.grid_rowconfigure(1, weight=1)
         self.frame.grid_rowconfigure(3, weight=2)
         self.frame.grid_propagate(False)
-        
-    def load_icon(self, path, size):
-        image = Image.open(path)
-        original_width, original_height = image.size
-        
-        if original_width > original_height:
-            new_width = size
-            new_height = int((original_height * size) / original_width)
-        else:
-            new_height = size
-            new_width = int((original_width * size) / original_height)
-        
-        return image.resize((new_width, new_height), Image.LANCZOS)
     
     def get_publishes(self, new_browser_selection):
-
+        
         self.publishes_list_box.delete(0, "END")
         self.publish_version_list_box.delete(0, "END")
-        
         self.get_publish_button.configure(state="disabled")
         
-        if len(new_browser_selection) < 3:
-            return
+        publishes_list = get_publishes_list(new_browser_selection)
         
-        if not new_browser_selection.get("element"):
-            return
-        
-        publishes_docs = DB_instance().get_docs(
-            collection="publishes", 
-            key=["source_asset"],
-            value=[new_browser_selection.get("element")]
-        )
-        
-        
-        if not publishes_docs:
+        if not publishes_list:
             self.publishes_list_box.insert("END", "No publishes found")
             self.publishes_list_box.configure(state="disabled")
             return
         
         self.publishes_list_box.configure(state="normal")
         
-        for doc in publishes_docs:
-                publish_name = doc.get("custom_name", "Unknown")
-                publish_type = doc.get("publish_type", "OBJECT")
-            
-                icon_map = {
-                    "COLLECTION": "collection",
-                    "MATERIAL": "material",
-                    "NODE_GROUP": "node_group",
-                    "OBJECT": "object"
-                }
-                
-                image_type = icon_map.get(publish_type, "object")
-                
-                image_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "publishes", image_type + ".png")
-                
-                if os.path.exists(image_path):
-                    pil_image = self.load_icon(image_path, 20)
-                    icon = ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=pil_image.size)
-                else:
-                    icon = None
-                
-                self.publishes_list_box.insert("END", publish_name, icon=icon)
+        for publish in publishes_list:
+            self.publishes_list_box.insert(
+                "END", 
+                publish["name"], 
+                icon=publish["icon"]
+            )
     
     def get_publish_versions(self, selected):
         
-        versions = DB_instance().get_nested_keys(
-            collection="publishes",
-            key="custom_name",
-            value=selected,
-            field_name="published_versions"
-        )
-        
         self.publish_version_list_box.delete(0, "END")
-        
         self.get_publish_button.configure(state="disabled")
-
-        if not versions:
-            return
         
-        def sort_versions(v):
-            if v == "latest":
-                return (0, 0) 
-            else:
-                try:
-                    num = int(v) 
-                    return (1, -num)
-                except ValueError:
-                    return (2, v)
-                
-        versions_sorted = sorted(versions, key=sort_versions)
+        versions_sorted = get_publish_versions_list(selected)
+        
+        if not versions_sorted:
+            self.publish_version_list_box.insert("END", "No versions found")
+            return
             
         for i, version in enumerate(versions_sorted):
             self.publish_version_list_box.insert(i, version)
@@ -136,6 +74,12 @@ class PublishesFrame:
             self.get_publish_button.configure(state="disabled")
         
     def copy_publish_id(self):
+        
+        from ...database.db_instance import DB_instance
+        from ...tool.woody_instance import WoodyInstance
+        
+        import subprocess
+        import platform
         
         browser_selection = WoodyInstance().browser_selection().get("element")
         
@@ -184,9 +128,7 @@ class PublishesFrame:
         # Publishes listbox
         self.publishes_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
             
             command=self.get_publish_versions
             )
@@ -229,9 +171,7 @@ class PublishesFrame:
         # Publish versions listbox
         self.publish_version_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
             
             command=self.on_version_selected
             )

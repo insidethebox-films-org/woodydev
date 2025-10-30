@@ -51,3 +51,9 @@ INPUT_DIALOG_STYLE = {
     "button_hover_color": COLORS["hover"],
     "button_text_color": COLORS["text"]
 }
+
+LIST_BOX_STYLE = {
+    "highlight_color":"#575757",
+    "hover_color":"#3F3F3F",
+    "border_width":2
+}

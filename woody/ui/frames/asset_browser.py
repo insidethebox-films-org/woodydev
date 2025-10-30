@@ -1,3 +1,4 @@
+from .. import style
 from ..widgets import CTkListbox
 from ...tool.woody_instance import WoodyInstance
 from ...database.db_instance import DB_instance
@@ -145,9 +146,8 @@ class AssetBrowserFrame:
         # Root list box
         self.root_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
+            
             command=self.on_root_select
             )
         self.root_list_box.grid(row=0, column=0, sticky="nsew", pady=5, padx=(5,0))
@@ -157,9 +157,8 @@ class AssetBrowserFrame:
         # Group list box
         self.group_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
+            
             command=self.on_group_select
         )
         self.group_list_box.grid(row=0, column=1, sticky="nsew", pady=5, padx=(5,0))
@@ -167,9 +166,7 @@ class AssetBrowserFrame:
         # Element list box
         self.element_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
             
             command=self.on_element_select
         )

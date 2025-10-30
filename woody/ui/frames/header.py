@@ -1,3 +1,4 @@
+from .. import style
 from ...tool.woody_instance import WoodyInstance
 from ...tool.event_bus import event_bus
 from ...lib.mongodb.get_projects import get_projects_db
@@ -54,7 +55,7 @@ class HeaderFrame:
         )
         self.frame.pack(fill="x", padx=3, pady=3)
         self.frame.pack_propagate(False) 
-        self.frame.grid_columnconfigure(0, weight=1) 
+        self.frame.grid_columnconfigure(0, weight=1)
         
         # Logo frame 
         self.logo_frame = ctk.CTkFrame(
@@ -77,11 +78,12 @@ class HeaderFrame:
             border_width=2,          
             border_color="#77563c",
             fg_color="#222222",
-            height=frames_height
+            height=frames_height,
+            width=235
         )
         self.project_picker_frame.grid_columnconfigure(0, weight=1)
         self.project_picker_frame.grid_rowconfigure(0, weight=1)
-        self.project_picker_frame.grid(row=0, column=1, sticky="nse", padx=0, pady=0)
+        self.project_picker_frame.grid(row=0, column=1, sticky="nsew", padx=0, pady=0)
         self.project_picker_frame.grid_propagate(False)
     
     def create_widgets(self):
@@ -103,6 +105,14 @@ class HeaderFrame:
         )
         headerImage.grid(row=0, column=0, pady=(5, 2), padx=12, sticky="nsw")
         
+        self.project_label = ctk.CTkLabel(
+            self.project_picker_frame,
+            text="Projects:",
+            **style.SUB_HEADER_LABEL,
+            text_color="#EBEBEB"
+        )
+        self.project_label.grid(row=0, column=0, sticky="we", padx=(12,0))
+        
         #Project picker combobox
         self.projectComboBox = ctk.CTkComboBox(
             self.project_picker_frame,
@@ -112,4 +122,4 @@ class HeaderFrame:
             command=self.set_project_name_settings
         )
         self.projectComboBox.set(WoodyInstance().projectName)
-        self.projectComboBox.grid(row=0, column=0, sticky="we", padx=12)
+        self.projectComboBox.grid(row=0, column=1, sticky="we", padx=(6,12))
