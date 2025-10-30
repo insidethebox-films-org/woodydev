@@ -1,9 +1,7 @@
 from ..widgets import CTkListbox
 from ...tool.woody_instance import WoodyInstance
+from ...database.db_instance import DB_instance
 from ...tool.event_bus import event_bus
-from ...lib.mongodb.get_groups_elements import get_group_sequence_names, get_elements_names
-from ...lib.mongodb.get_group_element_details import get_group_element_details
-
 
 import customtkinter as ctk
 
@@ -45,8 +43,19 @@ class AssetBrowserFrame:
     def on_root_select(self, selected):
         self.current_group_type = selected
         self.group_list_box.delete(0, "END")
+        
+        if selected == "Assets Group":
+            collection_name = "groups"
+        else:
+            collection_name = "sequences"
 
-        groups = get_group_sequence_names(selected)
+        groups = DB_instance().get_docs(
+            collection=collection_name,
+            key=["name"],
+            key_filter="name"
+        )
+        
+        groups = sorted(groups, key=str.lower) if groups else []
         
         for i, group in enumerate(groups):
             self.group_list_box.insert(i, group)
@@ -62,7 +71,22 @@ class AssetBrowserFrame:
     def on_group_select(self, selected):
         self.current_group = selected
         self.element_list_box.delete(0, "END")
-        elements = get_elements_names(selected)
+        
+        if self.current_group_type == "Assets Group":
+            collection_name = "assets"
+            key_type = "group"
+        else:
+            collection_name = "shots"
+            key_type = "sequence"
+        
+        elements = DB_instance().get_docs(
+            collection=collection_name,
+            key=[key_type],
+            value=[selected],
+            key_filter="name"
+        )
+        
+        elements = sorted(elements, key=str.lower) if elements else []
         
         for i, element in enumerate(elements):
             self.element_list_box.insert(i, element)
@@ -73,7 +97,21 @@ class AssetBrowserFrame:
             self.selection_callback_func(self.asset_browser_selection)
             
         WoodyInstance.browser_selection(self.asset_browser_selection)
-        WoodyInstance.asset_details(get_group_element_details())
+        
+        if self.current_group_type == "Assets Group":
+            collection_name = "groups"
+        else:
+            collection_name = "sequences"
+        
+        element_details = DB_instance().get_docs(
+            collection=collection_name,
+            key=["name"],
+            value=[selected],
+            key_filter=None,
+            find_one=True
+        )
+        
+        WoodyInstance.asset_details(element_details)
         
         event_bus.publish('browser_selection_changed', self.asset_browser_selection)
 
@@ -84,7 +122,21 @@ class AssetBrowserFrame:
             self.selection_callback_func(self.asset_browser_selection)
             
         WoodyInstance.browser_selection(self.asset_browser_selection)
-        WoodyInstance.asset_details(get_group_element_details())
+        
+        if self.current_group_type == "Assets Group":
+            collection_name = "assets"
+        else:
+            collection_name = "shots"
+        
+        element_details = DB_instance().get_docs(
+            collection=collection_name,
+            key=["name"],
+            value=[selected],
+            key_filter=None,
+            find_one=True
+        )
+        
+        WoodyInstance.asset_details(element_details)
         
         event_bus.publish('browser_selection_changed', self.asset_browser_selection)
             
