@@ -8,7 +8,6 @@ __all__ = [
     'create_project_db',
     'create_group_sequence_db',
     'create_element_db',
-    'get_groups_elements',
     'create_blend_db',
     'get_projects_db',
 ]
