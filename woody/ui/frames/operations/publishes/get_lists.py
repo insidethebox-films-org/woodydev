@@ -1,7 +1,6 @@
 from .....database.db_instance import DB_instance
 import os
 from ....utils.load_icon import load_icon
-import customtkinter as ctk
 
 
 def get_publishes_list(new_browser_selection):
@@ -32,7 +31,6 @@ def get_publishes_list(new_browser_selection):
     if not publishes_docs:
         return []
     
-    # Build list of publish info with icons
     publishes_list = []
     
     icon_map = {
@@ -58,12 +56,7 @@ def get_publishes_list(new_browser_selection):
         icon = None
         if os.path.exists(image_path):
             try:
-                pil_image = load_icon(image_path, 20)
-                icon = ctk.CTkImage(
-                    light_image=pil_image, 
-                    dark_image=pil_image, 
-                    size=pil_image.size
-                )
+                icon = load_icon(image_path, 20)
             except Exception as e:
                 print(f"Error loading icon for {publish_name}: {e}")
         
@@ -72,8 +65,7 @@ def get_publishes_list(new_browser_selection):
             "type": publish_type,
             "icon": icon
         })
-    
-    # Sort by name (case-insensitive)
+
     publishes_list.sort(key=lambda x: x["name"].lower())
     
     return publishes_list
