@@ -4,15 +4,6 @@ from ....utils.load_icon import load_icon
 
 
 def get_publishes_list(new_browser_selection):
-    """
-    Get list of publishes for the selected element with their metadata
-    
-    Args:
-        new_browser_selection: Dict with element info
-        
-    Returns:
-        List of dicts with publish info (name, type, icon) or empty list
-    """
     
     if len(new_browser_selection) < 3:
         return []
@@ -45,7 +36,6 @@ def get_publishes_list(new_browser_selection):
         publish_type = doc.get("publish_type", "OBJECT")
         image_type = icon_map.get(publish_type, "object")
         
-        # Build icon path relative to this file
         image_path = os.path.join(
             os.path.dirname(__file__), 
             "..", "..", "..", "..", 
@@ -72,15 +62,6 @@ def get_publishes_list(new_browser_selection):
 
 
 def get_publish_versions_list(selected_publish_name):
-    """
-    Get versions for a specific publish
-    
-    Args:
-        selected_publish_name: Name of the selected publish
-        
-    Returns:
-        List of version strings sorted with "latest" first
-    """
     
     if not selected_publish_name:
         return []
