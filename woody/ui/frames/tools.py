@@ -4,6 +4,7 @@ from ..windows import CreateProjectWindow
 from ..windows import CreateElementWindow
 from ..windows import CreateGroupWindow
 from ..windows import CreateBlendWindow
+from ..utils.load_icon import load_icon
 
 import os
 import customtkinter as ctk
@@ -26,23 +27,6 @@ class ToolsFrame:
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.grid_rowconfigure(3, weight=1)
         self.frame.grid_propagate(False)
-
-    def load_icon(self, path, size):
-        image = Image.open(path)
-        original_width, original_height = image.size
-        
-        if original_width > original_height:
-            new_width = size
-            new_height = int((original_height * size) / original_width)
-        else:
-            new_height = size
-            new_width = int((original_width * size) / original_height)
-        
-        return ctk.CTkImage(
-            light_image=image,
-            dark_image=image,
-            size=(new_width, new_height)
-        )
         
     def open_create_project(self):
         create_project = CreateProjectWindow(self.parent.winfo_toplevel())
@@ -68,7 +52,7 @@ class ToolsFrame:
     def create_widgets(self):
 
         create_project_icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "tools", "create_project.png")
-        create_project_icon = self.load_icon(create_project_icon_path, 22)
+        create_project_icon = load_icon(create_project_icon_path, 22)
 
         self.createProjectButton = ctk.CTkButton(
             self.frame,
@@ -86,7 +70,7 @@ class ToolsFrame:
         
         # Create Group Button
         create_group_icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "tools", "create_group.png")
-        create_group_icon = self.load_icon(create_group_icon_path, 28)
+        create_group_icon = load_icon(create_group_icon_path, 28)
 
         self.createGroupButton = ctk.CTkButton(
             self.frame,
@@ -105,7 +89,7 @@ class ToolsFrame:
 
         # Create Element Button
         create_element_icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "tools", "create_element.png")
-        create_element_icon = self.load_icon(create_element_icon_path, 25)
+        create_element_icon = load_icon(create_element_icon_path, 25)
 
         self.createElementButton = ctk.CTkButton(
             self.frame,
@@ -123,7 +107,7 @@ class ToolsFrame:
         
         # Create Blend Button
         create_blend_icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "tools", "blender.png")
-        create_blend_icon = self.load_icon(create_blend_icon_path, 23)
+        create_blend_icon = load_icon(create_blend_icon_path, 23)
 
         self.createBlendButton = ctk.CTkButton(
             self.frame,
@@ -142,7 +126,7 @@ class ToolsFrame:
                 
         # Settings Button
         settings_icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "tools", "settings.png")
-        settings_icon = self.load_icon(settings_icon_path, 23)
+        settings_icon = load_icon(settings_icon_path, 23)
 
         self.settingsButton = ctk.CTkButton(
             self.frame,

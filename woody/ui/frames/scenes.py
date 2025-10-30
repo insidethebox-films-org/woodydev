@@ -1,9 +1,9 @@
 from .. import style
-from ...tool.woody_instance import WoodyInstance
-from ...database.db_instance import DB_instance
 from ...tool.event_bus import event_bus
 from ..widgets import CTkListbox
-from ...plugins.blender.blender_instance import BlenderInstance
+
+from .operations.scenes import get_blends_list, get_blend_versions_list
+from .operations.scenes import open_blend_file
 
 import customtkinter as ctk
 
@@ -12,6 +12,7 @@ class ScenesFrame:
         self.parent = parent
         self.create_frame()
         self.create_widgets()
+        self.element_id = None
         
         self.open_blend_button.configure(state="disabled")
         
@@ -37,38 +38,9 @@ class ScenesFrame:
         self.blend_version_list_box.delete(0, "END")
         
         self.open_blend_button.configure(state="disabled")
-
-        if len(new_browser_selection) < 3:
-            return
         
-        if not new_browser_selection.get("element"):
-            return
-        
-        root = new_browser_selection.get("group_type")
-        group = new_browser_selection.get("group")
-        element = new_browser_selection.get("element")
-        
-        if root == "Assets Group":
-            collection_name = "assets"
-            id_field = "asset_id"
-        else:
-            collection_name = "shots"
-            id_field = "shot_id"
-            
-        self.element_id = DB_instance().get_docs(
-            collection=collection_name, 
-            key=["group", "name"],
-            value=[group, element], 
-            key_filter=id_field,
-            find_one=True
-            )
-        
-        blends = DB_instance().get_docs(
-            collection="blends",
-            key=["element_id"],
-            value=[self.element_id],
-            key_filter="name"
-        )
+        # Get data
+        blends, self.element_id = get_blends_list(new_browser_selection)
 
         if not blends:
             self.blends_list_box.insert("END", "No scenes found")
@@ -84,35 +56,14 @@ class ScenesFrame:
     
     def get_blend_versions(self, selected):
         
-        versions_doc = DB_instance().get_docs(
-            collection="blends",
-            key=["element_id", "name"],
-            value=[self.element_id, selected],
-            find_one=True
-        )
-
-        blend_versions_dict = versions_doc.get("blend_files", {}) if versions_doc else {}
-        versions = list(blend_versions_dict.values())
-        
         self.blend_version_list_box.delete(0, "END")
         
         self.open_blend_button.configure(state="disabled")
         
-        if not versions:
-            return
+        # Get data
+        versions_sorted = get_blend_versions_list(self.element_id, selected)
         
-        def sort_versions(v):
-            if v == "latest":
-                return (0, 0) 
-            else:
-                try:
-                    num = int(v) 
-                    return (1, -num)
-                except ValueError:
-                    return (2, v)
-                
-        versions_sorted = sorted(versions, key=sort_versions)
-            
+        # Populate the listbox
         for i, version in enumerate(versions_sorted):
             self.blend_version_list_box.insert(i, version) 
      
@@ -121,33 +72,9 @@ class ScenesFrame:
             self.open_blend_button.configure(state="normal")
         else:
             self.open_blend_button.configure(state="disabled")
-        
-    def open_blend_file(self):
-        
-        woody = WoodyInstance().browser_selection()
-        blender = BlenderInstance()
-        group_type_selection = woody.get("group_type")
-        group_selection = woody.get("group")
-        element_selection = woody.get("element")
-        blend_selection = self.blends_list_box.get()
-        version_selection = self.blend_version_list_box.get()
-        
-        group_type = "assets" if group_type_selection == "Assets Group" else "shots"
-        
-        if version_selection == "latest":
-            blender.open_file(
-                group_type,
-                group_selection, 
-                element_selection,
-                f"{blend_selection}_latest.blend",
-            )   
-        else:
-            blender.open_file(
-                group_type,
-                group_selection, 
-                element_selection,
-                f"{blend_selection}_{version_selection}.blend",
-            )
+            
+    def on_open_blend_file(self):
+        open_blend_file(self.blends_list_box, self.blend_version_list_box)
             
     def create_widgets(self):
     
@@ -171,9 +98,7 @@ class ScenesFrame:
         # Blends listbox
         self.blends_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
             
             command=self.get_blend_versions
             )
@@ -216,9 +141,7 @@ class ScenesFrame:
         # Blend versions listbox
         self.blend_version_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
             
             command=self.on_version_selected
             )
@@ -242,6 +165,6 @@ class ScenesFrame:
             text="Open Scene",
             **style.BUTTON_STYLE,
             
-            command=self.open_blend_file
+            command=self.on_open_blend_file
         )
         self.open_blend_button.grid(row=0, padx=7, pady=8, sticky="ew")
