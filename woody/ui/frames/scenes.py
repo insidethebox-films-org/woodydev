@@ -73,6 +73,9 @@ class ScenesFrame:
         else:
             self.open_blend_button.configure(state="disabled")
             
+    def on_open_blend_file(self):
+        open_blend_file(self.blends_list_box, self.blend_version_list_box)
+            
     def create_widgets(self):
     
         # Header
@@ -162,6 +165,6 @@ class ScenesFrame:
             text="Open Scene",
             **style.BUTTON_STYLE,
             
-            command=open_blend_file
+            command=self.on_open_blend_file
         )
         self.open_blend_button.grid(row=0, padx=7, pady=8, sticky="ew")

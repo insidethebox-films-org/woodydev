@@ -3,6 +3,7 @@ from ..widgets import CTkListbox
 from ...tool.woody_instance import WoodyInstance
 from ...database.db_instance import DB_instance
 from ...tool.event_bus import event_bus
+from ..utils.get_collection import get_collection
 
 import customtkinter as ctk
 
@@ -45,10 +46,7 @@ class AssetBrowserFrame:
         self.current_group_type = selected
         self.group_list_box.delete(0, "END")
         
-        if selected == "Assets Group":
-            collection_name = "groups"
-        else:
-            collection_name = "sequences"
+        collection_name = get_collection(self.current_group_type, type="group")
 
         groups = DB_instance().get_docs(
             collection=collection_name,
@@ -73,16 +71,11 @@ class AssetBrowserFrame:
         self.current_group = selected
         self.element_list_box.delete(0, "END")
         
-        if self.current_group_type == "Assets Group":
-            collection_name = "assets"
-            key_type = "group"
-        else:
-            collection_name = "shots"
-            key_type = "sequence"
+        element_collection_name, element_key_type = get_collection(self.current_group_type, type="element")
         
         elements = DB_instance().get_docs(
-            collection=collection_name,
-            key=[key_type],
+            collection=element_collection_name,
+            key=[element_key_type],
             value=[selected],
             key_filter="name"
         )
@@ -99,13 +92,10 @@ class AssetBrowserFrame:
             
         WoodyInstance.browser_selection(self.asset_browser_selection)
         
-        if self.current_group_type == "Assets Group":
-            collection_name = "groups"
-        else:
-            collection_name = "sequences"
+        group_collection_name = get_collection(self.current_group_type, type="group")
         
         element_details = DB_instance().get_docs(
-            collection=collection_name,
+            collection=group_collection_name,
             key=["name"],
             value=[selected],
             key_filter=None,
@@ -124,10 +114,7 @@ class AssetBrowserFrame:
             
         WoodyInstance.browser_selection(self.asset_browser_selection)
         
-        if self.current_group_type == "Assets Group":
-            collection_name = "assets"
-        else:
-            collection_name = "shots"
+        collection_name, key_type = get_collection(self.current_group_type, type="element")
         
         element_details = DB_instance().get_docs(
             collection=collection_name,
