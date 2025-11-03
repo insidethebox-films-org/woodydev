@@ -1,8 +1,5 @@
 from .. import style
-
-from ...lib.mongodb import get_group_sequence_names
 from ...lib.mongodb import create_blend_db
-
 from ...plugins.blender.blender_instance import BlenderInstance
 from ...tool.woody_instance import WoodyInstance
 

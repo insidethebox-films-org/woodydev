@@ -1,9 +1,9 @@
+from .. import style
 from ..widgets import CTkListbox
 from ...tool.woody_instance import WoodyInstance
+from ...database.db_instance import DB_instance
 from ...tool.event_bus import event_bus
-from ...lib.mongodb.get_groups_elements import get_group_sequence_names, get_elements_names
-from ...lib.mongodb.get_group_element_details import get_group_element_details
-
+from ..utils.get_collection import get_collection
 
 import customtkinter as ctk
 
@@ -45,8 +45,16 @@ class AssetBrowserFrame:
     def on_root_select(self, selected):
         self.current_group_type = selected
         self.group_list_box.delete(0, "END")
+        
+        collection_name = get_collection(self.current_group_type, type="group")
 
-        groups = get_group_sequence_names(selected)
+        groups = DB_instance().get_docs(
+            collection=collection_name,
+            key=["name"],
+            key_filter="name"
+        )
+        
+        groups = sorted(groups, key=str.lower) if groups else []
         
         for i, group in enumerate(groups):
             self.group_list_box.insert(i, group)
@@ -62,7 +70,17 @@ class AssetBrowserFrame:
     def on_group_select(self, selected):
         self.current_group = selected
         self.element_list_box.delete(0, "END")
-        elements = get_elements_names(selected)
+        
+        element_collection_name, element_key_type = get_collection(self.current_group_type, type="element")
+        
+        elements = DB_instance().get_docs(
+            collection=element_collection_name,
+            key=[element_key_type],
+            value=[selected],
+            key_filter="name"
+        )
+        
+        elements = sorted(elements, key=str.lower) if elements else []
         
         for i, element in enumerate(elements):
             self.element_list_box.insert(i, element)
@@ -73,7 +91,18 @@ class AssetBrowserFrame:
             self.selection_callback_func(self.asset_browser_selection)
             
         WoodyInstance.browser_selection(self.asset_browser_selection)
-        WoodyInstance.asset_details(get_group_element_details())
+        
+        group_collection_name = get_collection(self.current_group_type, type="group")
+        
+        element_details = DB_instance().get_docs(
+            collection=group_collection_name,
+            key=["name"],
+            value=[selected],
+            key_filter=None,
+            find_one=True
+        )
+        
+        WoodyInstance.asset_details(element_details)
         
         event_bus.publish('browser_selection_changed', self.asset_browser_selection)
 
@@ -84,7 +113,18 @@ class AssetBrowserFrame:
             self.selection_callback_func(self.asset_browser_selection)
             
         WoodyInstance.browser_selection(self.asset_browser_selection)
-        WoodyInstance.asset_details(get_group_element_details())
+        
+        collection_name, key_type = get_collection(self.current_group_type, type="element")
+        
+        element_details = DB_instance().get_docs(
+            collection=collection_name,
+            key=["name"],
+            value=[selected],
+            key_filter=None,
+            find_one=True
+        )
+        
+        WoodyInstance.asset_details(element_details)
         
         event_bus.publish('browser_selection_changed', self.asset_browser_selection)
             
@@ -93,9 +133,8 @@ class AssetBrowserFrame:
         # Root list box
         self.root_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
+            
             command=self.on_root_select
             )
         self.root_list_box.grid(row=0, column=0, sticky="nsew", pady=5, padx=(5,0))
@@ -105,9 +144,8 @@ class AssetBrowserFrame:
         # Group list box
         self.group_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
+            
             command=self.on_group_select
         )
         self.group_list_box.grid(row=0, column=1, sticky="nsew", pady=5, padx=(5,0))
@@ -115,9 +153,7 @@ class AssetBrowserFrame:
         # Element list box
         self.element_list_box = CTkListbox(
             self.frame,
-            highlight_color="#86753d",
-            hover_color="#5a5a5a",
-            border_width=2,
+            **style.LIST_BOX_STYLE,
             
             command=self.on_element_select
         )
