@@ -28,6 +28,12 @@ class WOODY_OT_version_up(bpy.types.Operator):
             extension = current_path.suffix
             filename = current_path.stem
             
+            # Check if current file is already a versioned file (e.g., aaa_v9.blend)
+            version_check_pattern = re.compile(r".*_v\d+$")
+            if version_check_pattern.match(filename):
+                self.report({'ERROR'}, "Cannot version up from a versioned file. Open the _latest file instead.")
+                return {'CANCELLED'}
+            
             # Remove _latest suffix if it exists
             base_filename = filename.replace("_latest", "")
             
