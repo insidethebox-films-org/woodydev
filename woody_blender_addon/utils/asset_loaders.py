@@ -23,6 +23,9 @@ def load_collections(blend_path: str, context):
         if data_from.collections:
             data_to.collections = data_from.collections
 
+    # Make library paths relative for cross-platform compatibility
+    bpy.ops.file.make_paths_relative()
+
     for col in data_to.collections:
         if col:
             context.scene.collection.children.link(col)
@@ -48,6 +51,9 @@ def load_materials(blend_path: str, context):
         if data_from.materials:
             data_to.materials = data_from.materials
 
+    # Make library paths relative for cross-platform compatibility
+    bpy.ops.file.make_paths_relative()
+
     for mat in data_to.materials:
         if mat:
             linked_items.append(mat.name)
@@ -71,6 +77,9 @@ def load_objects(blend_path: str, context):
     with bpy.data.libraries.load(blend_path, link=True) as (data_from, data_to):
         if data_from.objects:
             data_to.objects = data_from.objects
+
+    # Make library paths relative for cross-platform compatibility
+    bpy.ops.file.make_paths_relative()
 
     for obj in data_to.objects:
         if obj:
@@ -97,6 +106,9 @@ def load_meshes(blend_path: str, context):
         if data_from.meshes:
             data_to.meshes = data_from.meshes
 
+    # Make library paths relative for cross-platform compatibility
+    bpy.ops.file.make_paths_relative()
+
     for mesh in data_to.meshes:
         if mesh:
             linked_items.append(mesh.name)
@@ -120,6 +132,9 @@ def load_node_groups(blend_path: str, context):
     with bpy.data.libraries.load(blend_path, link=True) as (data_from, data_to):
         if data_from.node_groups:
             data_to.node_groups = data_from.node_groups
+
+    # Make library paths relative for cross-platform compatibility
+    bpy.ops.file.make_paths_relative()
 
     for node_group in data_to.node_groups:
         if node_group:
