@@ -98,7 +98,7 @@ class ScenesFrame:
         blend = self.blends_list_box.get()
         version = self.blend_version_list_box.get()
         
-        if not version == "latest":
+        if version != "latest":
             v = "v"
         else:
             v = ""
