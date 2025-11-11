@@ -51,7 +51,7 @@ class CreateProjectWindow:
             create_project_db(project_name, host_address, project_directory)
             create_project_fd(project_name)
         except Exception as e:
-            print("Error:", e)    
+            print("Error creating project:", e)    
         
         install_blender_libraries(woody.blenderExecutable)
         copy_prefs_to_addon() #TODO remove
