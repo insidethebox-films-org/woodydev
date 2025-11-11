@@ -44,7 +44,7 @@ class CreateBlendWindow:
         data = store.get_namespace("browser_selection")
         element = data.get("element")
         
-        if element == None:
+        if element is None:
             self.blendNameEntry.delete(0, "end")
             self.blendNameEntry.insert(0, "Please select an element in browser")
             self.blendNameEntry.configure(

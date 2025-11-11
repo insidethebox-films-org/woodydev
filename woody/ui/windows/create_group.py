@@ -42,7 +42,7 @@ class CreateGroupWindow:
         data = store.get_namespace("browser_selection")
         root = data.get("root")
      
-        if root == None:
+        if root is None:
             self.groupNameEntry.delete(0, "end")
             self.groupNameEntry.insert(0, "Please select a root in browser")
             self.groupNameEntry.configure(

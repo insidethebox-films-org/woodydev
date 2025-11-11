@@ -41,7 +41,6 @@ class Directory():
         thread = threading.Thread(target=run, daemon=True)
         thread.start()
         thread.join()
-        
 
     def get_root_path(self, host_address, location, project_name):
 

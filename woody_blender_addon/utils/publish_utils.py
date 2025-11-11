@@ -463,7 +463,7 @@ def refresh_loaded_publishes_data(context):
     import json
     context.scene.woody_loaded_publishes_data = json.dumps(loaded_publishes)
 
-def _extract_project_info_from_path(self, file_path: str, source_asset: str):
+def _extract_project_info_from_path(file_path: str, source_asset: str):
     """Extract project, root, group, element from file path"""
     try:
         if not file_path:

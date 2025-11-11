@@ -41,7 +41,7 @@ class CreateElementWindow:
         data = store.get_namespace("browser_selection")
         group = data.get("group")
      
-        if group == None:
+        if group is None:
             self.elementNameEntry.delete(0, "end")
             self.elementNameEntry.insert(0, "Please select a group in browser")
             self.elementNameEntry.configure(

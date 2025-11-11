@@ -15,13 +15,13 @@ async def create_element_db_async(root, group, elementName):
     if root == 'Assets':
         collection_name = "assets"
         group_type = "groups"
-        group_feild = "group"
+        group_field = "group"
         template_type = assets_template
 
     else:
         collection_name = "shots"
         group_type = "sequences"
-        group_feild = "sequence"
+        group_field = "sequence"
         template_type = shots_template
         
     id = create_woody_id(root, group, elementName)
@@ -36,7 +36,7 @@ async def create_element_db_async(root, group, elementName):
     template = copy.deepcopy(template_type)
     template["id"] = id
     template["parent_id"] = parent_id
-    template[group_feild] = group
+    template[group_field] = group
     template["name"] = elementName
     template["created_time"] = datetime.now()  
     template["modified_time"] = datetime.now()
