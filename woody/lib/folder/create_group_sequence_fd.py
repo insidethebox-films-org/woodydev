@@ -1,10 +1,10 @@
-from .directory_instance import DirectoryInstance
+from ...objects import Directory
 
 def create_group_sequence_fd(type, folder_name):
     
     group_type = "assets" if type == "Assets" else "shots"
     
-    dirInstance = DirectoryInstance()
+    dirInstance = Directory()
     base_path = dirInstance.root_path / group_type
     
     folders = {

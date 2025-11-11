@@ -1,8 +1,8 @@
 from .. import style
 
 from ...tool.memory_store import store
-from ...lib.folder import create_group_sequence_fd
-from ...lib.mongodb import create_group_sequence_db
+from ...lib.folder.create_group_sequence_fd import create_group_sequence_fd
+from ...lib.mongodb.create_group_sequence_db import create_group_sequence_db
 
 import os
 import customtkinter as ctk

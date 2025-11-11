@@ -1,8 +1,8 @@
-from .directory_instance import DirectoryInstance
+from ...objects import Directory
 
 def create_project_fd(project_name):
 
-    dir_instance = DirectoryInstance(project_name)
+    dir_instance = Directory(project_name)
     base_path = dir_instance.root_path
     
     folders = {

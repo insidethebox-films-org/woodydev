@@ -1,12 +1,11 @@
-from ..tool import WoodyInstance
+from .woody import Woody
 from pymongo import AsyncMongoClient
 
-class AsyncMongoDB:
-
-    def __init__(self):
-        woody = WoodyInstance()
+class Database:
+    def __init__(self, project_name=None):
+        woody = Woody()
         self.uri = woody.mongoDBAddress
-        self.project = woody.projectName
+        self.project = project_name if project_name else woody.projectName
         
         self.client = AsyncMongoClient(self.uri)
         self.connect = self.client[self.project]
@@ -47,4 +46,3 @@ class AsyncMongoDB:
             return result.modified_count
         except Exception as e:
             raise Exception(f"Failed to update document in '{collection_name}': {e}")
-        

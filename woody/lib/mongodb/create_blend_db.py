@@ -1,5 +1,5 @@
-from ...database.async_db_instance import AsyncMongoDB
-from ...database.templates.blend import blend_template
+from ...objects import Database
+from ...templates.blend import blend_template
 from ...tool.woody_id import create_woody_id
 
 import copy
@@ -19,7 +19,7 @@ async def create_blend_db_async(root, group, element_name, blend_name):
         bool: True if the blend document was created successfully, False otherwise.
     """
     
-    db = AsyncMongoDB()
+    db = Database()
     
     # Find the element document to get its ID
     element = await db.connect[root].find_one({"name": element_name})

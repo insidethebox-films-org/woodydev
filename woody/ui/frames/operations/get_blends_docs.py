@@ -1,12 +1,12 @@
 from ....tool.woody_id import get_browser_selection_id
-from ....database.async_db_instance import AsyncMongoDB
+from ....objects import Database
 
 import asyncio
 import threading
     
 async def get_blends_async():
     
-    db = AsyncMongoDB()
+    db = Database()
     
     parent_id = get_browser_selection_id(element_id=True)
     
@@ -25,7 +25,7 @@ def get_blends(callback):
     
 async def get_blend_versions_async(selected):
     
-    db = AsyncMongoDB()
+    db = Database()
     
     parent_id = get_browser_selection_id(element_id=True)
     id = f"{parent_id}|blend:{selected}"

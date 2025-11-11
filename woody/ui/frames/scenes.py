@@ -3,7 +3,7 @@ from ..widgets import CTkListbox
 from ...tool.memory_store import store
 from .operations.get_blends_docs import get_blends, get_blend_versions
 from .operations.utils import sort_versions
-from ...plugins.blender.blender_instance import BlenderInstance
+from ...plugins.blender import Blender
 
 import re
 import customtkinter as ctk
@@ -89,7 +89,7 @@ class ScenesFrame:
             
     def on_open_blend_file(self):
         
-        blender = BlenderInstance()
+        blender = Blender()
         
         data = store.get_namespace("browser_selection")
         root = data.get("root")

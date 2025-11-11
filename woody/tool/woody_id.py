@@ -1,11 +1,11 @@
-from .woody_instance import WoodyInstance
+from ..objects import Woody
 from .memory_store import store
 
 prefix = "woodyID:"
 
 def create_woody_id(root, group, element=None, blend=None):
     
-    project = WoodyInstance().projectName
+    project = Woody().projectName
     root = str.lower(root)
     
     if element == None:
@@ -20,7 +20,7 @@ def create_woody_id(root, group, element=None, blend=None):
 
 def get_browser_selection_id(group_id=False, element_id=False):
     
-    project = WoodyInstance().projectName
+    project = Woody().projectName
     
     data = store.get_namespace("browser_selection")
     root = str.lower(data.get("root", ""))

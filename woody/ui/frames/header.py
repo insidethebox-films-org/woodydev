@@ -1,6 +1,6 @@
 from .. import style
 
-from ...database.async_db_instance import AsyncMongoDB
+from ...objects import Database
 from ...utils.save_load_settings import save_settings_json, load_settings_json
 
 import os
@@ -71,7 +71,7 @@ class HeaderFrame:
         
         def run():
             async def fetch():
-                db = AsyncMongoDB()
+                db = Database()
                 return await db.get_databases()
             
             projects = asyncio.run(fetch())

@@ -1,6 +1,6 @@
-from ...database.async_db_instance import AsyncMongoDB
-from ...database.templates.assets import assets_template
-from ...database.templates.shots import shots_template
+from ...objects import Database
+from ...templates.assets import assets_template
+from ...templates.shots import shots_template
 from ...tool.woody_id import create_woody_id
 
 import asyncio
@@ -10,7 +10,7 @@ from datetime import datetime
 
 async def create_element_db_async(root, group, elementName):
 
-    db = AsyncMongoDB()
+    db = Database()
 
     if root == 'Assets':
         collection_name = "assets"

@@ -1,12 +1,12 @@
 from ....tool.memory_store import store
-from ....database.async_db_instance import AsyncMongoDB
+from ....objects import Database
 
 import asyncio
 import threading
     
 async def get_groups_async():
     
-    db = AsyncMongoDB()
+    db = Database()
     
     data = store.get_namespace("browser_selection")
     root = data.get("root", "Assets")
@@ -31,7 +31,7 @@ def get_groups(callback):
     
 async def get_elements_async():
     
-    db = AsyncMongoDB()
+    db = Database()
     
     data = store.get_namespace("browser_selection")
     root = data.get("root", "Assets")

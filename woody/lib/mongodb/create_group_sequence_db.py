@@ -1,7 +1,7 @@
-from ...database.async_db_instance import AsyncMongoDB
+from ...objects import Database
 from ...tool.woody_id import create_woody_id
-from ...database.templates.groups import groups_template
-from ...database.templates.sequences import sequences_template
+from ...templates.groups import groups_template
+from ...templates.sequences import sequences_template
 
 import asyncio
 import threading
@@ -10,7 +10,7 @@ from datetime import datetime
 
 async def create_group_sequence_db_async(root, name):
     
-    db = AsyncMongoDB()
+    db = Database()
 
     if root == 'Assets':
         collection_name = "groups"

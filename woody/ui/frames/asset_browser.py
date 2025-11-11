@@ -70,6 +70,7 @@ class AssetBrowserFrame:
         
         if hasattr(self, "scenes_frame"):
             if selected:
+                self.scenes_frame.clear_scenes()
                 self.scenes_frame.on_element_selected(selected)
             else:
                 self.scenes_frame.clear_scenes()

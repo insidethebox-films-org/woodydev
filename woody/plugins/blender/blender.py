@@ -1,14 +1,11 @@
 import os
 
-from ...tool.woody_instance import WoodyInstance
-from ...database.db_instance import DB_instance
-from ...lib.folder.directory_instance import DirectoryInstance
+from ...objects import Woody, Directory
 from .operations import *
 
-class BlenderInstance:
+class Blender:
     def __init__(self):
-        self.woody = WoodyInstance()
-        self.db = DB_instance()
+        self.woody = Woody()
         self.executable = set_executable_path(self.woody.blenderExecutable)
 
         self.addon_dir = get_addon_dir(self.woody.blenderExecutable)
@@ -21,7 +18,7 @@ class BlenderInstance:
             print(f"Invalid Blender executable path: {self.executable}")
             return False
         
-        blend_path = DirectoryInstance().construct_path([group_type, group_name, element_name, blend_name])
+        blend_path = Directory().construct_path([group_type, group_name, element_name, blend_name])
         
         return create_blend_file(self.executable, blend_path)
 
@@ -31,7 +28,7 @@ class BlenderInstance:
             print(f"Invalid Blender executable path: {self.executable}")
             return False
         
-        blend_path = DirectoryInstance().construct_path([group_type, group_name, element_name, blend_name])
+        blend_path = Directory().construct_path([group_type, group_name, element_name, blend_name])
         print(blend_path)
         
         return open_blend_file(self.executable, blend_path, self.addon_zip)

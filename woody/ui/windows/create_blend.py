@@ -1,6 +1,6 @@
 from .. import style
-from ...lib.mongodb import create_blend_db
-from ...plugins.blender.blender_instance import BlenderInstance
+from ...lib.mongodb.create_blend_db import create_blend_db
+from ...plugins.blender import Blender
 from ...tool.memory_store import store
 
 import re
@@ -16,7 +16,7 @@ class CreateBlendWindow:
         self.window.transient(parent) 
         self.window.grab_set()
         
-        self.blender = BlenderInstance()
+        self.blender = Blender()
         
         # Set icon
         icon_path = os.path.join(
