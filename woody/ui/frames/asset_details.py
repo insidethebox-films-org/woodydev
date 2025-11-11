@@ -98,7 +98,7 @@ class AssetDetailsFrame:
         for widget in list(self.asset_details_frame.winfo_children()):
             try:
                 widget.destroy()
-            except:
+            except Exception:
                 pass 
 
     def create_widgets(self):
