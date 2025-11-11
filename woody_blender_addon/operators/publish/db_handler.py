@@ -37,7 +37,7 @@ class PublishDatabaseHandler:
             print(f"Error getting existing names: {e}")
             return []
 
-    def get_or_create_publish_document(self, source_asset: str, publish_type: str, custom_name: str):
+    def get_or_create_publish_document(self, source_asset: str, publish_type: str, custom_name: str, project: str = None, root: str = None, group: str = None, element: str = None):
         """Get existing publish document or create new one with the new structure"""
         try:
             client, db, error = get_database_connection()
@@ -64,7 +64,7 @@ class PublishDatabaseHandler:
                             published_versions["latest"] = {
                                 "source_file": existing.get("source_file", ""),
                                 "published_path": existing.get("published_path", ""),
-                                "created_time": existing.get("created_time", datetime.now(timezone.utc)),
+                                "created_time": existing.get("created_time", datetime.now()),
                                 "selected_item": existing.get("selected_item", "")
                             }
                         else:
@@ -75,7 +75,7 @@ class PublishDatabaseHandler:
                                 published_versions[version] = {
                                     "source_file": existing.get("source_file", ""),
                                     "published_path": existing.get("published_path", ""),
-                                    "created_time": existing.get("created_time", datetime.now(timezone.utc)),
+                                    "created_time": existing.get("created_time", datetime.now()),
                                     "selected_item": existing.get("selected_item", "")
                                 }
                     
@@ -100,12 +100,13 @@ class PublishDatabaseHandler:
             else:
                 # Create new document with new structure
                 new_document = {
-                    "publish_id": str(uuid.uuid4()),
+                    "parent_id": f"woodyID:{project}|{root}|{group}|{element}",
+                    "publish_id": f"woodyID:{project}|{root}|{group}|{element}|publish:{custom_name}"  ,#str(uuid.uuid4()),
                     "source_asset": source_asset,
                     "publish_type": publish_type,
                     "custom_name": custom_name,
                     "published_versions": {},
-                    "created_time": datetime.now(timezone.utc)
+                    "created_time": datetime.now()
                 }
                 
                 result = db["publishes"].insert_one(new_document)
@@ -178,7 +179,7 @@ class PublishDatabaseHandler:
             # Move 'latest' to versioned entry and update the path (store as relative)
             versioned_entry = latest_version.copy()
             versioned_entry["published_path"] = to_project_relative(str(new_path))
-            versioned_entry["versioned_time"] = datetime.now(timezone.utc)
+            versioned_entry["versioned_time"] = datetime.now()
             
             # Update the document: move latest to version number
             update_result = db["publishes"].update_one(
@@ -211,7 +212,7 @@ class PublishDatabaseHandler:
                 "source_file": to_project_relative(source_file),
                 "published_path": to_project_relative(published_path),
                 "selected_item": selected_item,
-                "created_time": datetime.now(timezone.utc)
+                "created_time": datetime.now()
             }
 
             # Add the latest version to the document
@@ -220,7 +221,7 @@ class PublishDatabaseHandler:
                 {
                     "$set": {
                         "published_versions.latest": latest_version,
-                        "last_updated": datetime.now(timezone.utc)
+                        "last_updated": datetime.now()
                     }
                 }
             )

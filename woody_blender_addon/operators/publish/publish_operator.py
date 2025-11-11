@@ -374,7 +374,7 @@ class WOODY_OT_publish(bpy.types.Operator):
             update_data = {
                 "$set": {
                     "blend_files": blend_files,
-                    "modified_time": datetime.now(timezone.utc),
+                    "modified_time": datetime.now(),
                     "latest_version": version_number
                 }
             }
@@ -419,11 +419,14 @@ class WOODY_OT_publish(bpy.types.Operator):
             publish_dir.mkdir(exist_ok=True)
             
             # Get asset name for versioning logic
-            source_asset = current_path.parent.name
+            source_asset = current_path.parent.name  # element
+            group = current_path.parent.parent.name  # group  
+            root = current_path.parent.parent.parent.name  # root (assets/shots)
+            project = current_path.parent.parent.parent.parent.name  # project
             
             # Get or create the publish document for this asset+type+name combination
             publish_document, _ = self.db_handler.get_or_create_publish_document(
-                source_asset, self.publish_type, self.custom_name
+                source_asset, self.publish_type, self.custom_name, project, root, group, source_asset
             )
             
             next_version = None

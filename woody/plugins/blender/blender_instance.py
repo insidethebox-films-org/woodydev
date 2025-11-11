@@ -40,13 +40,3 @@ class BlenderInstance:
         """Updates the addon zip file for development"""
         return update_zip_dev(self.addon_zip)
     
-    # def get_blend_path(self, group_type: str, group_name: str, element_name: str, blend_name: str) -> str:
-    #     """Gets the blend file path for given parameters"""
-    #     return get_blend_path(
-    #         str(self.db.projectDirectory),
-    #         str(self.woody.projectName),
-    #         group_type,
-    #         group_name,
-    #         element_name,
-    #         blend_name,
-    #     )

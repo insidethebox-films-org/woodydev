@@ -1,7 +1,11 @@
 from .. import style
 
-import os
+from ...database.async_db_instance import AsyncMongoDB
+from ...utils.save_load_settings import save_settings_json, load_settings_json
 
+import os
+import asyncio
+import threading
 import customtkinter as ctk
 from PIL import Image
 
@@ -9,8 +13,12 @@ from PIL import Image
 class HeaderFrame:
     def __init__(self, parent):
         self.parent = parent
+        self.asset_browser = None
         self.create_frame()
         self.create_widgets()
+        
+        self.populate_projects_list()
+        self.set_project_from_prefs()
 
     def create_frame(self):
         frames_height=50
@@ -53,6 +61,55 @@ class HeaderFrame:
         self.project_picker_frame.grid_rowconfigure(0, weight=1)
         self.project_picker_frame.grid(row=0, column=1, sticky="nsew", padx=0, pady=0)
         self.project_picker_frame.grid_propagate(False)
+        
+    def set_project_from_prefs(self):
+        settings = load_settings_json()
+        project = settings.get("projectName")
+        self.projectComboBox.set(project)
+    
+    def populate_projects_list(self):
+        
+        def run():
+            async def fetch():
+                db = AsyncMongoDB()
+                return await db.get_databases()
+            
+            projects = asyncio.run(fetch())
+            self.parent.after(0, lambda: self.update_ui(projects))
+        
+        threading.Thread(target=run, daemon=True).start()
+        
+        self.parent.after(5000, self.populate_projects_list)
+    
+    def update_ui(self, projects):
+        
+        if not hasattr(self, 'projectComboBox'):
+            return
+        
+        current = self.projectComboBox.get()
+        
+        if projects:
+            self.projectComboBox.configure(values=projects)
+            if current in projects:
+                self.projectComboBox.set(current)
+            elif not current or current == "Loading...":
+                self.projectComboBox.set(projects[0])
+        else:
+            self.projectComboBox.configure(values=["No projects"])
+            self.projectComboBox.set("No projects")
+        
+    def set_project_name_settings(self, selected):
+        save_settings_json(projectName=selected)
+        
+        if self.asset_browser:
+            self.asset_browser.group_list_box.delete(0, "END")
+            self.asset_browser.element_list_box.delete(0, "END")
+            self.asset_browser.root_list_box.deselect(0)
+            
+            from ...tool.memory_store import store
+            store.set_value("browser_selection", "root", None)
+            store.set_value("browser_selection", "group", None)
+            store.set_value("browser_selection", "element", None)
     
     def create_widgets(self):
         
@@ -87,6 +144,6 @@ class HeaderFrame:
             values="",
             height=25,
             state="readonly",
-            command=""
+            command=self.set_project_name_settings
         )
         self.projectComboBox.grid(row=0, column=1, sticky="we", padx=(6,12))

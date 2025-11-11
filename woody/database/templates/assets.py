@@ -1,8 +1,8 @@
 assets_template = {
-    "asset_id": None,
+    "id": "",
+    "parent_id": "",
     "group": "",
     "name": "",
-    "latest_version": None,
     "created_time": "",
     "modified_time": ""
 }

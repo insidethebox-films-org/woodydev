@@ -17,15 +17,3 @@ class WoodyInstance():
         self.mongoDBAddress = settings.get("mongoDBAddress")
         self.blenderExecutable = settings.get("blenderExecutable")
     
-    @classmethod
-    def browser_selection(cls, selection_data=None):
-        if selection_data is not None:
-            cls._browser_selection_data = selection_data
-        return cls._browser_selection_data
-    
-    @classmethod
-    def asset_details(cls, doc=None):
-        if doc is not None:
-            cls._asset_details = doc
-        return cls._asset_details
-    

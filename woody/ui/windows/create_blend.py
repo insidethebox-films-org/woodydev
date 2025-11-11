@@ -1,7 +1,7 @@
 from .. import style
 from ...lib.mongodb import create_blend_db
 from ...plugins.blender.blender_instance import BlenderInstance
-from ...tool.woody_instance import WoodyInstance
+from ...tool.memory_store import store
 
 import re
 import os
@@ -38,24 +38,27 @@ class CreateBlendWindow:
         
         self.create_widgets()
         
-        # Make entry unavalible if no element is selected
-        woody = WoodyInstance().browser_selection()
+        self.check_browser_selection()
+
+    def check_browser_selection(self):
+        data = store.get_namespace("browser_selection")
+        element = data.get("element")
         
-        if not woody or not woody.get("element"):
+        if element == None:
             self.blendNameEntry.delete(0, "end")
             self.blendNameEntry.insert(0, "Please select an element in browser")
             self.blendNameEntry.configure(
                 state="disabled",
                 **style.BODY_DANGER
             )
-            self.createBlendButton.configure(state="disabled")
-
-    def _create_blend_file(self):
+            self.createBlendButton.configure(state="disabled")      
+    
+    def create_blend_file(self):
         
-        woody = WoodyInstance().browser_selection()
-        group_type_selection = woody.get("group_type")
-        group_selection = woody.get("group")
-        element_selection = woody.get("element")
+        data = store.get_namespace("browser_selection")
+        root = str.lower(data["root"])
+        group = data["group"]
+        element = data["element"]
         
         blend_name = self.blendNameEntry.get().strip()
         # Validate blend name - prevent _latest and _v* patterns
@@ -69,22 +72,17 @@ class CreateBlendWindow:
         
         # Append _latest to the blend name for file creation
         blend_name_with_latest = f"{blend_name}_latest.blend"
-        group_type = "assets" if group_type_selection == "Assets Group" else "shots"
         
         # Try to create the database entry first
-        if create_blend_db(group_type, group_selection, element_selection, blend_name):
+        if create_blend_db(root, group, element, blend_name):
             # Only create the file if database entry was successful
-            success = self.blender.create_file(
-                group_type,
-                group_selection,
-                element_selection,
+            self.blender.create_file(
+                root,
+                group,
+                element,
                 blend_name_with_latest
             )
-            
-            if success:
-                print(f"Blend file created successfully: {blend_name_with_latest}")
-            else:
-                print("Failed to create blend file")
+            print(f"Blend file created successfully: {blend_name_with_latest}")
         else:
             print("Failed to create database entry - blend file not created")
        
@@ -130,7 +128,7 @@ class CreateBlendWindow:
             self.frame,
             text="Create Blend File",
             **style.BUTTON_STYLE,
-            command=self._create_blend_file
+            command=self.create_blend_file
         )
         self.createBlendButton.grid(row=4, sticky="nwe", padx=8, pady=8)
 

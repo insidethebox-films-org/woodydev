@@ -1,6 +1,11 @@
 from .. import style
 from ..widgets import CTkListbox
+from ...tool.memory_store import store
+from .operations.get_blends_docs import get_blends, get_blend_versions
+from .operations.utils import sort_versions
+from ...plugins.blender.blender_instance import BlenderInstance
 
+import re
 import customtkinter as ctk
 
 class ScenesFrame:
@@ -8,7 +13,7 @@ class ScenesFrame:
         self.parent = parent
         self.create_frame()
         self.create_widgets()
-        self.element_id = None
+        self.browser_selection = None
         
         self.open_blend_button.configure(state="disabled")
             
@@ -25,7 +30,86 @@ class ScenesFrame:
         self.frame.grid_rowconfigure(1, weight=1)
         self.frame.grid_rowconfigure(3, weight=2)
         self.frame.grid_propagate(False)
+        
+    def clear_scenes(self):
+        self.browser_selection = None
+        self.blends_list_box.delete(0, "END")
+        self.blend_version_list_box.delete(0, "END")
+        self.open_blend_button.configure(state="disabled")
+        
+    def on_element_selected(self, selected):
+        self.open_blend_button.configure(state="disabled")
+        
+        if selected:
+            self.browser_selection = selected
+            
+            self.blends_list_box.delete(0, "END")
+            
+            def get_blends_list(selected, docs):
+                if self.browser_selection != selected:
+                    return
+                
+                names = [doc.get("name") for doc in docs if doc.get("name")]
+                names.sort(key=str.lower)
+                
+                for name in names:
+                    self.blends_list_box.insert("END", name)
+                
+            def populate_blends(docs):
+                self.frame.after(0, get_blends_list, selected, docs)
+                    
+            get_blends(callback=populate_blends)
     
+    def on_blend_selected(self, selected):
+        self.open_blend_button.configure(state="disabled")
+        
+        def get_versions_list(docs):
+            
+            self.blend_version_list_box.delete(0, "END")
+            
+            if not docs or not docs.get("blend_files"):
+                return
+                
+            versions = list(docs.get("blend_files").values())
+            sorted_versions = sorted(versions, key=sort_versions)
+
+            for version in sorted_versions:
+                self.blend_version_list_box.insert("END", version)
+        
+        def populate_versions(docs):
+            self.frame.after(0, get_versions_list, docs)
+        
+        get_blend_versions(selected, callback=populate_versions)
+        
+    def on_version_selected(self, selected):
+        if selected:
+            self.open_blend_button.configure(state="normal")
+        else:
+            self.open_blend_button.configure(state="disabled")
+            
+    def on_open_blend_file(self):
+        
+        blender = BlenderInstance()
+        
+        data = store.get_namespace("browser_selection")
+        root = data.get("root")
+        group = data.get("group")
+        element = data.get("element")
+        blend = self.blends_list_box.get()
+        version = self.blend_version_list_box.get()
+        
+        if not version == "latest":
+            v = "v"
+        else:
+            v = ""
+        
+        blender.open_file(
+            root,
+            group, 
+            element,
+            f"{blend}_{v}{version}.blend",
+        ) 
+        
     def create_widgets(self):
     
         # Header
@@ -50,7 +134,7 @@ class ScenesFrame:
             self.frame,
             **style.LIST_BOX_STYLE,
             
-            command=""
+            command=self.on_blend_selected
             )
         self.blends_list_box.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(3,5), padx=5)
         
@@ -93,7 +177,7 @@ class ScenesFrame:
             self.frame,
             **style.LIST_BOX_STYLE,
             
-            command=""
+            command=self.on_version_selected
             )
         self.blend_version_list_box.grid(row=3, column=0, sticky="nsew", pady=(0,5), padx=5)
         
@@ -115,6 +199,6 @@ class ScenesFrame:
             text="Open Scene",
             **style.BUTTON_STYLE,
             
-            command=""
+            command=self.on_open_blend_file
         )
         self.open_blend_button.grid(row=0, padx=7, pady=8, sticky="ew")

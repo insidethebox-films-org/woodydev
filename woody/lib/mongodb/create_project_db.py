@@ -2,7 +2,7 @@ from ...database.db_instance import DB_instance
 from ...database.templates.settings import settings_template
 
 import copy
-from datetime import datetime, timezone
+from datetime import datetime
 
 def create_project_db(name, host_address, directory):
     
@@ -20,7 +20,7 @@ def create_project_db(name, host_address, directory):
     settings["project_name"] = name
     settings["host_address"] = host_address
     settings["location"] = directory
-    settings["created_time"] = datetime.now(timezone.utc)
+    settings["created_time"] = datetime.now()
     db.add_document("settings", settings)
 
     print(f"Collection 'settings' is set up in database '{db.name}'.")

@@ -1,6 +1,7 @@
 blend_template = {
-    "name": "",
-    "element_id": None,
+    "id": "",
+    "parent_id": "",
+    "name": "",  
     "blend_files": {},
     "created_time": "",
     "modified_time": ""

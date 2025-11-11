@@ -44,7 +44,7 @@ class CreateProjectWindow:
         
         # Create project folders and database
         print("Project name:", project_name)
-        print("Project directory:", project_directory) #TODO creates folders in wrong location
+        print("Project directory:", project_directory)
         if create_project_db(project_name, project_host_address, project_directory):
             create_project_fd(project_name)
         else:

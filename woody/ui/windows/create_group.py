@@ -1,7 +1,8 @@
 from .. import style
+
+from ...tool.memory_store import store
 from ...lib.folder import create_group_sequence_fd
 from ...lib.mongodb import create_group_sequence_db
-from ...tool.woody_instance import WoodyInstance
 
 import os
 import customtkinter as ctk
@@ -35,25 +36,28 @@ class CreateGroupWindow:
         
         self.create_widgets()
         
-        # Make entry unavalible if no group type is selected
-        woody = WoodyInstance().browser_selection()
-        
-        if not woody or not woody.get("group_type"):
+        self.check_browser_selection()
+      
+    def check_browser_selection(self):
+        data = store.get_namespace("browser_selection")
+        root = data.get("root")
+     
+        if root == None:
             self.groupNameEntry.delete(0, "end")
-            self.groupNameEntry.insert(0, "Please select a group type in browser")
+            self.groupNameEntry.insert(0, "Please select a root in browser")
             self.groupNameEntry.configure(
                 state="disabled",
                 **style.BODY_DANGER
             )
-            self.createGroupButton.configure(state="disabled")
-    
+            self.createGroupButton.configure(state="disabled")   
+        
     def create_group(self):
         
-        woody = WoodyInstance().browser_selection()
-        group_type = woody.get("group_type")
+        data = store.get_namespace("browser_selection")
+        root = data["root"]
         
-        create_group_sequence_fd(group_type, self.groupNameEntry.get())
-        create_group_sequence_db(group_type, self.groupNameEntry.get())
+        create_group_sequence_fd(root, self.groupNameEntry.get())
+        create_group_sequence_db(root, self.groupNameEntry.get())
         
     def create_widgets(self):
          

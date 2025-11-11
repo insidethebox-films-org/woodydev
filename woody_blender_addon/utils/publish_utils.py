@@ -462,3 +462,32 @@ def refresh_loaded_publishes_data(context):
     # Store the publish data for UI buttons
     import json
     context.scene.woody_loaded_publishes_data = json.dumps(loaded_publishes)
+
+def _extract_project_info_from_path(self, file_path: str, source_asset: str):
+    """Extract project, root, group, element from file path"""
+    try:
+        if not file_path:
+            return None, None, None, None
+            
+        path = Path(file_path)
+        path_parts = path.parts
+        
+        # Find the source_asset in the path to determine structure
+        # Assuming structure like: /project/root/group/element/file.blend
+        # where element == source_asset
+        
+        for i, part in enumerate(path_parts):
+            if part == source_asset:
+                # Found the element, extract the hierarchy
+                if i >= 3:  # Need at least 4 levels: project/root/group/element
+                    project = path_parts[i-3]
+                    root = path_parts[i-2] 
+                    group = path_parts[i-1]
+                    element = part
+                    return project, root, group, element
+        
+        return None, None, None, None
+        
+    except Exception as e:
+        print(f"Error extracting project info from path: {e}")
+        return None, None, None, None

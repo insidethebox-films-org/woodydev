@@ -1,7 +1,9 @@
 import os
 import subprocess
+import asyncio
+import threading
 
-def create_blend_file(executable: str, blend_path: str) -> bool:
+async def create_blend_file_async(executable: str, blend_path: str) -> bool:
     """Creates a new blend file
     
     Args:
@@ -31,4 +33,12 @@ def create_blend_file(executable: str, blend_path: str) -> bool:
     except Exception as e:
         print(f"Error creating blend file: {str(e)}")
         return False
+    
+def create_blend_file(executable, blend_path):
+
+    def run():
+        asyncio.run(create_blend_file_async(executable, blend_path))
+    
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
 
