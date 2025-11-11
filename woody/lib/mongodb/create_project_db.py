@@ -11,7 +11,7 @@ async def create_project_db_async(name, host_address, directory):
     client = Database().client
     
     if name in await client.list_database_names():
-        print(f"Collection 'settings' already exists in database '{name}'.")
+        print(f"Database \"{name}\" already exists.")
         return False
     
     db = client[name]
