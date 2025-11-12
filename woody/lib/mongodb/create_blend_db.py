@@ -40,17 +40,22 @@ async def create_blend_db_async(root, group, element_name, blend_name):
         print(f"Document '{blend_name}' already exists in collection '{collection_name}'.")
         return False
     
-    # Create document from template
-    template = copy.deepcopy(blend_template)
-    template["id"] = woody_id
-    template["parent_id"] = parent_id
-    template["name"] = blend_name
-    template["blend_files"] = {blend_path: "latest"}
-    template["created_time"] = datetime.now()  
-    template["modified_time"] = datetime.now()
+    try:
+        # Create document from template
+        template = copy.deepcopy(blend_template)
+        template["id"] = woody_id
+        template["parent_id"] = parent_id
+        template["name"] = blend_name
+        template["blend_files"] = {blend_path: "latest"}
+        template["created_time"] = datetime.now()  
+        template["modified_time"] = datetime.now()
+        
+        await db.add_document(collection_name, template)
+        print(f"Document '{blend_name}' is set up in collection '{collection_name}'.")
     
-    await db.add_document(collection_name, template)
-    print(f"Document '{blend_name}' is set up in collection '{collection_name}'.")
+    except Exception as e:
+        print(f"Error creating blend document: {str(e)}")
+        return False
     
     return True
     

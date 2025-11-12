@@ -16,14 +16,19 @@ async def create_project_db_async(name, host_address, directory):
     
     db = client[name]
     
-    settings = copy.deepcopy(settings_template)
-    settings["project_name"] = name
-    settings["host_address"] = host_address
-    settings["location"] = directory
-    settings["created_time"] = datetime.now()
+    try:
+        settings = copy.deepcopy(settings_template)
+        settings["project_name"] = name
+        settings["host_address"] = host_address
+        settings["location"] = directory
+        settings["created_time"] = datetime.now()
+        
+        collection = db["settings"]
+        await collection.insert_one(settings)
     
-    collection = db["settings"]
-    await collection.insert_one(settings)
+    except Exception as e:
+        print(f"Error creating settings document: {str(e)}")
+        return False
 
     print(f"Collection 'settings' is set up in database '{name}'.")
     
