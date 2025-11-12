@@ -40,9 +40,9 @@ class CreateProjectWindow:
     def create_project(self):
         woody = Woody()
         
-        project_name = self.projectNameEntry.get()
-        host_address = self.projectHostAddressEntry.get()
-        project_directory = self.projectDirectoryEntry.get()
+        project_name = self.projectNameEntry.get().strip()
+        host_address = self.projectHostAddressEntry.get().strip()
+        project_directory = self.projectDirectoryEntry.get().strip()
         
         print(f"Project name: {project_name}")
         print(f"Project directory: {project_directory}")

@@ -56,8 +56,8 @@ class CreateGroupWindow:
         data = store.get_namespace("browser_selection")
         root = data["root"]
         
-        create_group_sequence_fd(root, self.groupNameEntry.get())
-        create_group_sequence_db(root, self.groupNameEntry.get())
+        create_group_sequence_fd(root, self.groupNameEntry.get().strip())
+        create_group_sequence_db(root, self.groupNameEntry.get().strip())
         
     def create_widgets(self):
          

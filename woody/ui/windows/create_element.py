@@ -56,8 +56,8 @@ class CreateElementWindow:
         root = data["root"]
         group = data["group"]
         
-        create_element_db(root, group, self.elementNameEntry.get())
-        create_element_fd(root, group, self.elementNameEntry.get())
+        create_element_db(root, group, self.elementNameEntry.get().strip())
+        create_element_fd(root, group, self.elementNameEntry.get().strip())
         
     def create_widgets(self):
          
