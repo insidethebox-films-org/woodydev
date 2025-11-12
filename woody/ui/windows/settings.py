@@ -1,7 +1,7 @@
 from .. import style
 from ...utils import save_settings_json, load_settings_json
-from ...plugins.blender.blender_instance import BlenderInstance
-from ...tool.woody_instance import WoodyInstance
+from ...plugins.blender import Blender
+from ...objects import Woody
 from ...plugins.blender.install_blender_libraries import install_blender_libraries
 
 import os
@@ -16,7 +16,7 @@ class SettingsWindow:
         self.window.transient(parent) 
         self.window.grab_set()
         
-        self.blender = BlenderInstance()
+        self.blender = Blender()
         
         # Set icon
         icon_path = os.path.join(
@@ -53,7 +53,7 @@ class SettingsWindow:
         self.window.destroy()
     
     def install_blender(self):
-        blender_executable_path = WoodyInstance().blenderExecutable.strip()
+        blender_executable_path = Woody().blenderExecutable.strip()
         install_blender_libraries(blender_executable_path)
     
     def dev_update(self):

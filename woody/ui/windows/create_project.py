@@ -1,7 +1,7 @@
 from .. import style
-from ...tool.woody_instance import WoodyInstance
-from ...lib.folder import create_project_fd
-from ...lib.mongodb import create_project_db
+from ...objects import Woody
+from ...lib.folder.create_project_fd import create_project_fd
+from ...lib.mongodb.create_project_db import create_project_db
 from ...plugins.blender.install_blender_libraries import install_blender_libraries
 from ...plugins.blender.operations.copy_prefs_to_addon import copy_prefs_to_addon
 
@@ -38,32 +38,24 @@ class CreateProjectWindow:
         self.create_widgets()
         
     def create_project(self):
-        project_name=self.projectNameEntry.get().strip()
-        project_host_address=self.projectHostAddressEntry.get().strip()
-        project_directory=self.projectDirectoryEntry.get().strip()
+        woody = Woody()
         
-        # Create project folders and database
-        print("Project name:", project_name)
-        print("Project directory:", project_directory) #TODO creates folders in wrong location
-        if create_project_db(project_name, project_host_address, project_directory):
+        project_name = self.projectNameEntry.get().strip()
+        host_address = self.projectHostAddressEntry.get().strip()
+        project_directory = self.projectDirectoryEntry.get().strip()
+        
+        print(f"Project name: {project_name}")
+        print(f"Project directory: {project_directory}")
+        
+        try:
+            create_project_db(project_name, host_address, project_directory)
             create_project_fd(project_name)
-        else:
-            print(f"Error: Project creation failed, database already exists for {project_name}")
-            return
-
-        # Install Blender libraries
-        blender_executable_path = WoodyInstance().blenderExecutable.strip()
-        if blender_executable_path:
-            print("Installing required libraries into Blender...")
-            if install_blender_libraries(blender_executable_path):
-                print("Blender libraries installed successfully!")
-            else:
-                print("Warning: Library installation failed")
+        except Exception as e:
+            print("Error creating project:", e)    
         
-        # Copy prefs to addon
-        copy_prefs_to_addon()  #TODO remove
+        install_blender_libraries(woody.blenderExecutable)
+        copy_prefs_to_addon() #TODO remove
         
-        print(f"Project '{self.projectNameEntry.get()}' created successfully!")
         self.window.destroy()
     
     def create_widgets(self):

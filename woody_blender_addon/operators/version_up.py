@@ -154,7 +154,7 @@ class WOODY_OT_version_up(bpy.types.Operator):
             update_data = {
                 "$set": {
                     "blend_files": blend_files,
-                    "modified_time": datetime.now(timezone.utc),
+                    "modified_time": datetime.now(),
                     "latest_version": version_number
                 }
             }

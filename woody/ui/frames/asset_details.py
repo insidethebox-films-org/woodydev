@@ -1,19 +1,16 @@
 from .. import style
 from ...utils.format_date import format_date
-from ...tool.woody_instance import WoodyInstance
-from ...tool.event_bus import event_bus
+from .operations.get_asset_details import get_asset_details
 
 import customtkinter as ctk
 
-class AssetDetailsFrame:
+class AssetDetailsFrame: 
     def __init__(self, parent):
         self.parent = parent
-        self.detail_widgets = []
+        self.browser_selection = None
         
         self.create_frame()
         self.create_widgets()
-        
-        event_bus.subscribe('browser_selection_changed', self.get_asset_details)
             
     def create_frame(self):
         self.frame = ctk.CTkFrame(
@@ -24,49 +21,31 @@ class AssetDetailsFrame:
         )
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.grid_rowconfigure(2, weight=1)
-        
-    def get_asset_details(self, new_browser_selection):
-        
-        if not new_browser_selection:
-            print("asset_details: Received None selection")
-            return
-        
-        if not new_browser_selection.get("group"):
-            self.title_label.configure(text="Select an item")
+
+    def get_asset_details(self, selected, docs):
+        if self.browser_selection != selected:
+            return 
             
-            for widget in self.asset_details_frame.winfo_children():
-                widget.destroy()
+        self.clear_details()
+        
+        if not docs:
+            no_data_label = ctk.CTkLabel(
+                self.asset_details_frame,
+                text="No details available",
+                **style.BODY_LABEL
+            )
+            no_data_label.grid(row=0, column=0, padx=12, pady=12)
             return
-        
-        asset_details = WoodyInstance().asset_details()
-        
-        if not asset_details:
-            print("asset_details: No asset details available")
-            return
-        
-        # Update title
-        if new_browser_selection.get("group_type") == "Assets Group":
-            root = "assets"
-            group = new_browser_selection.get("group")
-        else:
-            root = "shots"
-            group = new_browser_selection.get("group")
-        
-        name = new_browser_selection.get("element")
-        path = f"{root}/{group}/{name}" if group and name else f"{root}/{group}"
-        self.title_label.configure(text=path)
-              
-        # Dynamic detail fields create
-        for widget in self.asset_details_frame.winfo_children():
-            widget.destroy()
-        
+
         exclude_fields = ["_id", "assets", "shots"]
-        
         current_row = 0
         
-        for key, value in asset_details.items():
+        for key, value in docs.items():
             if key in exclude_fields:
                 continue
+            
+            if self.browser_selection != selected:
+                return
             
             field_frame = ctk.CTkFrame(
                 self.asset_details_frame,
@@ -96,11 +75,31 @@ class AssetDetailsFrame:
                 fg_color="#1F1F1F",
                 border_width=0
             )
-            entry.insert(0, display_value)
+            entry.insert(0, display_value if display_value else "")
             entry.grid(row=0, column=1, padx=(5, 12), sticky="ew")
             entry.configure(state="readonly")
             
             current_row += 1
+
+    def update_details(self, selected):
+        
+        if selected:
+            self.browser_selection = selected
+        
+            def populate_details(docs):
+                self.frame.after(0, self.get_asset_details, selected, docs)
+                        
+            get_asset_details(callback=populate_details)
+        else:
+            self.browser_selection = None
+            self.frame.after(0, self.clear_details)
+    
+    def clear_details(self):
+        for widget in list(self.asset_details_frame.winfo_children()):
+            try:
+                widget.destroy()
+            except Exception:
+                pass 
 
     def create_widgets(self):
         

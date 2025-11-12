@@ -1,7 +1,7 @@
 from .. import style
-from ...lib.folder import create_element_fd
-from ...lib.mongodb import create_element_db
-from ...tool.woody_instance import WoodyInstance
+from ...lib.folder.create_element_fd import create_element_fd
+from ...lib.mongodb.create_element_db import create_element_db
+from ...tool.memory_store import store
 
 import os
 import customtkinter as ctk
@@ -35,26 +35,29 @@ class CreateElementWindow:
         
         self.create_widgets()
         
-        # Make entry unavalible if no element is selected
-        woody = WoodyInstance().browser_selection()
-        
-        if not woody or not woody.get("group"):
+        self.check_browser_selection()
+    
+    def check_browser_selection(self):
+        data = store.get_namespace("browser_selection")
+        group = data.get("group")
+     
+        if group is None:
             self.elementNameEntry.delete(0, "end")
             self.elementNameEntry.insert(0, "Please select a group in browser")
             self.elementNameEntry.configure(
                 state="disabled",
                 **style.BODY_DANGER
             )
-            self.createGroupButton.configure(state="disabled")
+            self.createElementButton.configure(state="disabled")  
     
     def create_element(self):
         
-        woody = WoodyInstance().browser_selection()
-        group_type = woody.get("group_type")
-        group = woody.get("group")
+        data = store.get_namespace("browser_selection")
+        root = data["root"]
+        group = data["group"]
         
-        create_element_db(group_type, group, self.elementNameEntry.get())
-        create_element_fd(group_type, group, self.elementNameEntry.get())
+        create_element_db(root, group, self.elementNameEntry.get().strip())
+        create_element_fd(root, group, self.elementNameEntry.get().strip())
         
     def create_widgets(self):
          
@@ -86,14 +89,14 @@ class CreateElementWindow:
         self.elementNameEntry.grid(row=7, column=0, sticky="new", padx=8)
         
         # Create Element
-        self.createGroupButton = ctk.CTkButton(
+        self.createElementButton = ctk.CTkButton(
             self.frame,
             text="Create Element",
             **style.BUTTON_STYLE,
             
             command=self.create_element
         )
-        self.createGroupButton.grid(row=8, sticky="nwe", padx=8, pady=8)
+        self.createElementButton.grid(row=8, sticky="nwe", padx=8, pady=8)
     
     def run(self):
         self.window.wait_window()

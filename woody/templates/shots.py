@@ -1,8 +1,8 @@
 shots_template = {
-    "shot_id": None,
+    "id": "",
+    "parent_id": "",
     "sequence": "",
     "name": "",
-    "latest_version": None,
     "created_time": "",
     "modified_time": ""
 }

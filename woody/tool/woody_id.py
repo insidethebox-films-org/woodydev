@@ -1,0 +1,46 @@
+from ..objects import Woody
+from .memory_store import store
+
+prefix = "woodyID:"
+
+def create_woody_id(root, group, element=None, blend=None):
+    
+    project = Woody().projectName
+    root = str.lower(root)
+    
+    if element is None:
+        woodyID = f"{prefix}{project}|{root}|{group}"    
+    elif blend is None:
+        woodyID = f"{prefix}{project}|{root}|{group}|{element}"
+    else:
+        woodyID = f"{prefix}{project}|{root}|{group}|{element}|blend:{blend}"
+    
+    print(f"Woody ID = {woodyID}")
+    return woodyID
+
+def get_browser_selection_id(group_id=False, element_id=False):
+    
+    project = Woody().projectName
+    
+    data = store.get_namespace("browser_selection")
+    root = str.lower(data.get("root", ""))
+    group = data.get("group", "")
+    element = data.get("element", "")
+    
+    if group_id == element_id:
+        print("Please select one return option")
+        return None
+    
+    if group_id:
+        if group != None:
+            woody_id = f"{prefix}{project}|{root}|{group}"
+            return woody_id
+        else:
+            print("No group selected in asset browser")
+    
+    if element_id:
+        if element != None:
+            woody_id = f"{prefix}{project}|{root}|{group}|{element}"
+            return woody_id
+        else:
+            print("No element selected in asset browser")

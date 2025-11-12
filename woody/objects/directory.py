@@ -1,26 +1,46 @@
-from ...database.db_instance import DB_instance
-from .operations import mount_drive
-from .operations import create_folders_subfolders
+from .database import Database
+from ..lib.folder.operations.mount_drive import mount_drive
+from ..lib.folder.operations.create_folders_subfolders import create_folders_subfolders
 
+import asyncio
+import threading
 import platform
 from pathlib import Path
 
-class DirectoryInstance():
+class Directory():
 
     def __init__(self, project_name=None):
+        self.project_name = None
+        self.host_address = None
+        self.location = None
         
-        if project_name:
-            settings = DB_instance(project_name).get_docs(collection="settings")[0]
-        else:
-            settings = DB_instance().get_docs(collection="settings")[0]
-        
-        self.project_name = settings.get("project_name")
-        self.host_address = settings.get("host_address")
-        self.location = settings.get("location")
+        self.get_settings(project_name)
         
         self.mount_local_drive(self.host_address, self.location)
         
         self.root_path = self.get_root_path(self.host_address, self.location,  self.project_name)
+        
+    async def get_settings_async(self, project_name):
+    
+        if project_name:
+            docs = await Database(project_name).get_docs("settings")
+            settings = docs[0]
+        else:
+            docs = await Database().get_docs("settings")
+            settings = docs[0]
+            
+        self.project_name = settings.get("project_name")
+        self.host_address = settings.get("host_address")
+        self.location = settings.get("location")
+        
+    def get_settings(self, project_name):
+
+        def run():
+            asyncio.run(self.get_settings_async(project_name))
+        
+        thread = threading.Thread(target=run, daemon=True)
+        thread.start()
+        thread.join()
 
     def get_root_path(self, host_address, location, project_name):
 

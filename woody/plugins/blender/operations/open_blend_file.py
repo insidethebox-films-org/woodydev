@@ -1,4 +1,4 @@
-from ....tool.woody_instance import WoodyInstance
+from ....objects import Woody
 
 import subprocess
 import os
@@ -17,7 +17,7 @@ def open_blend_file(executable: str, blend_path: str, addon_zip: str) -> bool:
     """
 
     try:
-        woody_instance = WoodyInstance()
+        woody_instance = Woody()
         mongo_address = woody_instance.mongoDBAddress or ""
         project_name = woody_instance.projectName or ""
         

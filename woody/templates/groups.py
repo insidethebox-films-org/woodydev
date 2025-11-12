@@ -1,4 +1,5 @@
 groups_template = {
+    "id": "",
     "name": "",
     "assets": {},
     "created_time": "",
