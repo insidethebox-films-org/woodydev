@@ -3,7 +3,9 @@ from ..widgets import CTkListbox
 from ...tool.memory_store import store
 from .operations.get_blends_docs import get_blends, get_blend_versions
 from .operations.utils import sort_versions
-from ...plugins.blender import Blender
+
+from ...objects.dcc import DCC
+from ...dcc.blender.blender import Blender
 
 import re
 import customtkinter as ctk
@@ -88,27 +90,14 @@ class ScenesFrame:
             self.open_blend_button.configure(state="disabled")
             
     def on_open_blend_file(self):
+        print("Opening scene file...")
+        dcc = "blender"
         
-        blender = Blender()
+        cls = DCC.registry.get(dcc.lower())
+        if not cls:
+            raise ValueError("Unknown DCC")
+        cls().open_file()
         
-        data = store.get_namespace("browser_selection")
-        root = data.get("root")
-        group = data.get("group")
-        element = data.get("element")
-        blend = self.blends_list_box.get()
-        version = self.blend_version_list_box.get()
-        
-        if version != "latest":
-            v = "v"
-        else:
-            v = ""
-        
-        blender.open_file(
-            root,
-            group, 
-            element,
-            f"{blend}_{v}{version}.blend",
-        ) 
         
     def create_widgets(self):
     
