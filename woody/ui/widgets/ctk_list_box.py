@@ -239,11 +239,11 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
         if index in self.buttons:
             self.buttons[index].destroy()
 
-        self.buttons[index] = customtkinter.CTkButton(
+        button = customtkinter.CTkButton(
             self,
             text=option,
-            image=icon,             # optional icon
-            compound="left",        # icon on left, text on right
+            image=icon,
+            compound="left",
             fg_color=self.button_fg_color,
             anchor=self.justify,
             text_color=self.text_color,
@@ -252,30 +252,32 @@ class CTkListbox(customtkinter.CTkScrollableFrame):
             **args,
         )
 
-        self.buttons[index].configure(command=lambda num=index: self.select(num))
+        button.configure(command=lambda num=index: self.select(num))
 
-        self.buttons[index]._text_label.config(anchor="w")
+        button._text_label.config(anchor="w")
         if self.wraplength:
-            self.buttons[index]._text_label.config(wraplength=self.wraplength)
+            button._text_label.config(wraplength=self.wraplength)
 
         if type(index) is int:
-            self.buttons[index].grid(padx=0, pady=(0, 5), sticky="nsew", column=0, row=index)
+            button.grid(padx=0, pady=(0, 5), sticky="nsew", column=0, row=index)
         else:
-            self.buttons[index].grid(padx=0, pady=(0, 5), sticky="nsew", column=0)
-            
-        if update:
-            self.update()
+            button.grid(padx=0, pady=(0, 5), sticky="nsew", column=0)
 
         if self.multiple:
-            self.buttons[index].bind(
-                "<Shift-1>", lambda e: self.select_multiple(self.buttons[index])
+            button.bind(
+                "<Shift-1>", lambda e, b=button: self.select_multiple(b)
             )
 
         for key, funcs in self.bindings.items():
             for func, add in funcs:
-                self.buttons[index].bind(key, lambda e, f=func: f(e), add=add)
+                button.bind(key, lambda e, f=func: f(e), add=add)
 
-        return self.buttons[index]
+        self.buttons[index] = button
+        
+        if update:
+            self.update()
+
+        return button
 
         
     def select_multiple(self, button):
