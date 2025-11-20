@@ -1,8 +1,6 @@
 from .. import style
 from ...utils import save_settings_json, load_settings_json
-from ...plugins.blender import Blender
 from ...objects import Woody
-from ...plugins.blender.install_blender_libraries import install_blender_libraries
 
 import os
 import customtkinter as ctk
@@ -16,7 +14,6 @@ class SettingsWindow:
         self.window.transient(parent) 
         self.window.grab_set()
         
-        self.blender = Blender()
         
         # Set icon
         icon_path = os.path.join(
@@ -51,16 +48,6 @@ class SettingsWindow:
         print(f"Saving settings:\nMongoDB Address: {mongoDBAddress}\nBlender Executable: {blenderExecutable}")
         save_settings_json(mongoDBAddress=mongoDBAddress, blenderExecutable=blenderExecutable)
         self.window.destroy()
-    
-    def install_blender(self):
-        blender_executable_path = Woody().blenderExecutable.strip()
-        install_blender_libraries(blender_executable_path)
-    
-    def dev_update(self):
-        if self.blender.dev_update():
-            print("Dev Update Complete", "Addon zip has been recreated successfully!")
-        else:
-            print("Dev Update Failed", "Failed to recreate addon zip. Check the console for details.")
     
     def create_widgets(self):
         # Settings Label
@@ -119,22 +106,6 @@ class SettingsWindow:
         
         separator = ctk.CTkFrame(self.frame, height=2, fg_color="#414141")
         separator.grid(row=7, column=0, sticky="ew", padx=5, pady=(2, 8), columnspan=2)
-        
-        self.blenderInstallButton = ctk.CTkButton(
-            self.frame,
-            text="Install Blender Addon and Dependencies",
-            **style.BUTTON_STYLE,
-            command=self.install_blender
-            )
-        self.blenderInstallButton.grid(row=8, sticky="nwe", padx=8, pady=(0,8))
-        
-        self.devUpdateButton = ctk.CTkButton(
-            self.frame,
-            text="Dev Update",
-            **style.BUTTON_STYLE,
-            command=self.dev_update
-            )
-        self.devUpdateButton.grid(row=9, sticky="nwe", padx=8, pady=(0,8))
     
     def run(self):
         self.window.wait_window()

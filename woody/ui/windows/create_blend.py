@@ -1,6 +1,6 @@
 from .. import style
 from ...lib.mongodb.create_blend_db import create_blend_db
-from ...plugins.blender import Blender
+#from ...plugins.blender import Blender
 from ...tool.memory_store import store
 
 import re
@@ -16,7 +16,7 @@ class CreateBlendWindow:
         self.window.transient(parent) 
         self.window.grab_set()
         
-        self.blender = Blender()
+        #self.blender = Blender()
         
         # Set icon
         icon_path = os.path.join(
@@ -76,13 +76,14 @@ class CreateBlendWindow:
         # Try to create the database entry first
         if create_blend_db(root, group, element, blend_name):
             # Only create the file if database entry was successful
-            self.blender.create_file(
-                root,
-                group,
-                element,
-                blend_name_with_latest
-            )
-            print(f"Blend file created successfully: {blend_name_with_latest}")
+            # self.blender.create_file(
+            #     root,
+            #     group,
+            #     element,
+            #     blend_name_with_latest
+            # )
+            # print(f"Blend file created successfully: {blend_name_with_latest}")
+            print("Not creating file cause blender code is commented out")
         else:
             print("Failed to create database entry - blend file not created")
        

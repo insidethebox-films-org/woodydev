@@ -2,8 +2,8 @@ from .. import style
 from ...objects import Woody
 from ...lib.folder.create_project_fd import create_project_fd
 from ...lib.mongodb.create_project_db import create_project_db
-from ...plugins.blender.install_blender_libraries import install_blender_libraries
-from ...plugins.blender.operations.copy_prefs_to_addon import copy_prefs_to_addon
+#from ...plugins.blender.install_blender_libraries import install_blender_libraries
+#from ...plugins.blender.operations.copy_prefs_to_addon import copy_prefs_to_addon
 
 import os
 import customtkinter as ctk
@@ -53,8 +53,8 @@ class CreateProjectWindow:
         except Exception as e:
             print("Error creating project:", e)    
         
-        install_blender_libraries(woody.blenderExecutable)
-        copy_prefs_to_addon() #TODO remove
+        #install_blender_libraries(woody.blenderExecutable)
+        #copy_prefs_to_addon() #TODO remove
         
         self.window.destroy()
     
