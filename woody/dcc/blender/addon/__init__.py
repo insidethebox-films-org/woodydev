@@ -8,28 +8,23 @@ bl_info = {
     "category": "Development",
 }
 
-import bpy 
-from .panel import VIEW3D_PT_context
-from .preferences import WoodyAddonPreferences
-from .operators.version_up import WOODY_OT_version_up
-from .operators.publish.publish_operator import WOODY_OT_publish
-from .operators.load_publish import WOODY_OT_load_publish, WOODY_OT_override_publish, WOODY_OT_refresh_loaded_publishes, WOODY_OT_delete_publish
-from .properties import register_properties, unregister_properties
+import bpy
+import os
+import sys
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.append(SCRIPT_DIR)
+
+from panel import VIEW3D_PT_context
+from ot_launch_ui import WOODY_OT_launch_UI
 
 # =============== Registration ===============
 
 classes = [
     VIEW3D_PT_context,
-    WOODY_OT_version_up,
-    WoodyAddonPreferences,
-    WOODY_OT_publish,
-    WOODY_OT_load_publish,
-    WOODY_OT_refresh_loaded_publishes,
-    WOODY_OT_override_publish,
-    WOODY_OT_delete_publish
+    WOODY_OT_launch_UI
 ]
-
 
 def register():
     for cls in classes:
@@ -37,14 +32,8 @@ def register():
             bpy.utils.register_class(cls)
         except Exception as e:
             print(f"Failed to register {cls.__name__}: {str(e)}")
-    
-    # Register scene properties
-    register_properties()
 
 def unregister():
-    # Unregister scene properties
-    unregister_properties()
-    
     for cls in reversed(classes):
         try:
             bpy.utils.unregister_class(cls)
