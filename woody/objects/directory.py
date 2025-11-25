@@ -1,6 +1,7 @@
 from .database import Database
-from ..lib.folder.operations.mount_drive import mount_drive
-from ..lib.folder.operations.create_folders_subfolders import create_folders_subfolders
+from .operations.mount_drive import mount_drive
+from .operations.create_folders_subfolders import create_folders_subfolders
+from .operations.get_dcc_executable import get_dcc_executable
 
 import asyncio
 import threading
@@ -68,4 +69,7 @@ class Directory():
 
     def create_folders_subfolders(self, base_path, folders):
         return create_folders_subfolders(base_path, folders)
+    
+    def get_dcc_executable(self, dcc):
+        return get_dcc_executable(dcc)
 
