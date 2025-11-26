@@ -33,8 +33,8 @@ class ControlSocket():
             print(f"Failed to bind control server: {e}")
             try:
                 self.server_socket.close()
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Failed to close server socket: {e}")
             return
 
         while self.is_running:
