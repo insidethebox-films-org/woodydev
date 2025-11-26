@@ -5,9 +5,10 @@ import os
 import customtkinter as ctk
 
 class DccGui:
-    def __init__(self):
+    def __init__(self, port=5000):
+        self.port = port
         self.window = ctk.CTkToplevel()
-        self.window.title("Woody DCC UI")
+        self.window.title(f"Woody DCC UI (Port: {port})")
         self.window.geometry("300x170")
         
         icon_path = os.path.join(
@@ -31,7 +32,7 @@ class DccGui:
     def add_cube(self):
         def print_result(result):
             print(f"Object Added: {result}")
-        execute_operation("create_cube", on_success=print_result)
+        execute_operation("create_cube", port=self.port, on_success=print_result)
         
     def create_widgets(self):
 
