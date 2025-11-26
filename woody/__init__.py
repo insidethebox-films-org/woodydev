@@ -104,7 +104,7 @@ class WoodyApp:
                     new_gui.window.attributes("-topmost", True)
                     new_gui.window.after(200, lambda: new_gui.window.attributes("-topmost", False))
                 except Exception:
-                    pass
+                    print(f"Error setting topmost attribute for new_gui.window: {Exception}")
         except Exception as e:
             print(f"Error in show_or_create_dcc_gui: {e}")
 
