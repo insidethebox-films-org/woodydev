@@ -2,9 +2,8 @@ import socket
 import json
 
 HOST = "127.0.0.1"
-PORT = 5000
 
-def execute_operation(operation, args=None, on_success=None, on_error=None):
+def execute_operation(operation, port=5000, args=None, on_success=None, on_error=None):
     if args is None:
         args = {}
     
@@ -14,7 +13,7 @@ def execute_operation(operation, args=None, on_success=None, on_error=None):
     }
     
     try:
-        s = socket.create_connection((HOST, PORT), timeout=5)
+        s = socket.create_connection((HOST, port), timeout=5)
         s.sendall(json.dumps(msg).encode())
         response = json.loads(s.recv(4096).decode())
         s.close()

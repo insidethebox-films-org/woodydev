@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import queue
+import random
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR not in sys.path:
@@ -13,7 +14,14 @@ if SCRIPT_DIR not in sys.path:
 from operations import OPERATIONS
 
 HOST = "127.0.0.1"
-PORT = 5000
+while True:
+    PORT = random.randint(1024, 49151)
+    if PORT != 6001:
+        break
+
+# Store PORT in window manager for addon access
+bpy.context.window_manager["woody_socket_port"] = PORT
+
 operation_queue = queue.Queue()
 
 def run_operation(data):
