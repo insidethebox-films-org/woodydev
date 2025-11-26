@@ -14,7 +14,10 @@ if SCRIPT_DIR not in sys.path:
 from operations import OPERATIONS
 
 HOST = "127.0.0.1"
-PORT = random.choice([p for p in range(1024, 49152) if p != 6001])
+while True:
+    PORT = random.randint(1024, 49151)
+    if PORT != 6001:
+        break
 
 # Store PORT in window manager for addon access
 bpy.context.window_manager["woody_socket_port"] = PORT
