@@ -14,11 +14,10 @@ class WOODY_OT_launch_UI(bpy.types.Operator):
         # via the control socket. If that fails, report an error (user should
         # start Woody first or we could try to launch it).
         try:
-            # Get the PORT from window manager
             port = context.window_manager.get("woody_socket_port", 5000)
             
             s = socket.create_connection(("127.0.0.1", CONTROL_PORT), timeout=1)
-            msg = {"command": "show_dcc_gui", "port": port}
+            msg = {"command": "show_dcc_gui", "dcc": "Blender", "port": port}
             s.sendall(json.dumps(msg).encode("utf8"))
             resp = s.recv(4096)
             try:

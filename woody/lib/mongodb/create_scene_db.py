@@ -1,5 +1,5 @@
 from ...objects import Database
-from ...templates.blend import blend_template
+from ...templates.scene import scene_template
 from ...tool.woody_id import create_woody_id
 
 import copy
@@ -7,9 +7,9 @@ import asyncio
 import threading
 from datetime import datetime
 
-async def create_blend_db_async(root, group, element_name, blend_name):
+async def create_scene_db_async(root, group, element_name, scene_name, dcc):
     """
-    Creates a new blend document in the MongoDB 'blends' collection for a specified element.
+    Creates a new blend document in the MongoDB 'scenes' collection for a specified element.
     Args:
         root (str): The type of group the element belongs to ('assets' or 'shots').
         group (str): The name of the group (e.g., asset or shot group).
@@ -28,30 +28,31 @@ async def create_blend_db_async(root, group, element_name, blend_name):
         print(f"Error: Element '{element_name}' not found in {root} collection")
         return False
 
-    blend_name_with_latest = f"{blend_name}_latest.blend"
-    blend_path = f"{root}\{group}\{element_name}\{blend_name_with_latest}"
-    collection_name = "blends"
+    scene_name_with_latest = f"{scene_name}_latest.blend"
+    scene_path = f"{root}\{group}\{element_name}\{scene_name_with_latest}"
+    collection_name = "scenes"
 
-    woody_id = create_woody_id(root, group, element_name, blend_name)
+    woody_id = create_woody_id(root, group, element_name, scene_name)
     parent_id = create_woody_id(root, group, element_name)
     
     # Check if document with the same name and element id already exists
-    if await db.connect[collection_name].find_one({"name": blend_name, "id": woody_id}):
-        print(f"Document '{blend_name}' already exists in collection '{collection_name}'.")
+    if await db.connect[collection_name].find_one({"name": scene_name, "id": woody_id}):
+        print(f"Document '{scene_name}' already exists in collection '{collection_name}'.")
         return False
     
     try:
         # Create document from template
-        template = copy.deepcopy(blend_template)
+        template = copy.deepcopy(scene_template)
         template["id"] = woody_id
         template["parent_id"] = parent_id
-        template["name"] = blend_name
-        template["blend_files"] = {blend_path: "latest"}
+        template["dcc"] = dcc
+        template["name"] = scene_name
+        template["files"] = {scene_path: "latest"}
         template["created_time"] = datetime.now()  
         template["modified_time"] = datetime.now()
         
         await db.add_document(collection_name, template)
-        print(f"Document '{blend_name}' is set up in collection '{collection_name}'.")
+        print(f"Document '{scene_name}' is set up in collection '{collection_name}'.")
     
     except Exception as e:
         print(f"Error creating blend document: {str(e)}")
@@ -59,13 +60,13 @@ async def create_blend_db_async(root, group, element_name, blend_name):
     
     return True
     
-def create_blend_db(root, group, element_name, blend_name):
+def create_scene_db(root, group, element_name, scene_name, dcc):
     
     result = {"success": False}
 
     def run():
         try:
-            success = asyncio.run(create_blend_db_async(root, group, element_name, blend_name))
+            success = asyncio.run(create_scene_db_async(root, group, element_name, scene_name, dcc))
             result["success"] = success
         except Exception as e:
             print(f"Error creating blend document: {str(e)}")

@@ -9,10 +9,11 @@ class VIEW3D_PT_context(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        port = context.window_manager.get("woody_socket_port", 5000)
 
         # Woody Tools Section
         rootBox = layout.box()
-        rootBox.label(text="Woody", icon="OUTLINER")
+        rootBox.label(text=f"Woody (Port: {port})", icon="OUTLINER")
         rootBox.scale_y = 0.75
         
         # Add Version Up button

@@ -1,8 +1,9 @@
-blend_template = {
+scene_template = {
     "id": "",
     "parent_id": "",
+    "dcc": "",
     "name": "",  
-    "blend_files": {},
+    "files": {},
     "created_time": "",
     "modified_time": ""
 }

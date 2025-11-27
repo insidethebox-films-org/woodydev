@@ -51,8 +51,9 @@ class ControlSocket():
 
                 cmd = msg.get("command")
                 if cmd == "show_dcc_gui":
+                    dcc = msg.get("dcc")
                     port = msg.get("port", 5000)
-                    app.mainWindow.after(0, lambda: app.show_or_create_dcc_gui(port))
+                    app.mainWindow.after(0, lambda: app.show_or_create_dcc_gui(dcc, port))
                     conn.sendall(b'{"status":"ok"}')
                 else:
                     conn.sendall(b'{"status":"error","message":"unknown command"}')
