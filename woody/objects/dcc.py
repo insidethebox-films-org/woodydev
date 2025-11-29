@@ -11,5 +11,5 @@ class DCC(ABC):
         return wrapper
 
     @abstractmethod
-    def open_file(self):
+    def open_file(self, root, group, element, scene):
         pass

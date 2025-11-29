@@ -3,17 +3,17 @@ from .memory_store import store
 
 prefix = "woodyID:"
 
-def create_woody_id(root, group, element=None, blend=None):
+def create_woody_id(root, group, element=None, scene=None):
     
     project = Woody().projectName
     root = str.lower(root)
     
     if element is None:
         woodyID = f"{prefix}{project}|{root}|{group}"    
-    elif blend is None:
+    elif scene is None:
         woodyID = f"{prefix}{project}|{root}|{group}|{element}"
     else:
-        woodyID = f"{prefix}{project}|{root}|{group}|{element}|blend:{blend}"
+        woodyID = f"{prefix}{project}|{root}|{group}|{element}|scene:{scene}"
     
     print(f"Woody ID = {woodyID}")
     return woodyID

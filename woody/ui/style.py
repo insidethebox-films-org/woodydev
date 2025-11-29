@@ -10,8 +10,6 @@ COLORS = {
     "success": "#72a343",
     "warning": "#e9883f",
     "danger": "#d13b3b",
-    
-
 }
 
 FONTS = {
@@ -38,6 +36,15 @@ BODY_DANGER = {
     "text_color": COLORS["danger"]
 }
 
+DCC_BUTTON_STYLE = {
+    "fg_color": COLORS["foreground"],
+    "hover_color": COLORS["hover"],
+    "text_color": COLORS["text"],
+    "corner_radius": 5,
+    "font": FONTS["body"],
+    "height": 25,
+}
+
 BUTTON_STYLE = {
     "fg_color": COLORS["foreground"],
     "hover_color": COLORS["hover"],
@@ -55,5 +62,7 @@ INPUT_DIALOG_STYLE = {
 LIST_BOX_STYLE = {
     "highlight_color":"#575757",
     "hover_color":"#3F3F3F",
-    "border_width":2
+    "border_width":2,
+    "bg_color": "#242424",
+    "fg_color": "#242424",
 }

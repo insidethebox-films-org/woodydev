@@ -73,7 +73,7 @@ class WoodyApp:
         self.status_bar_frame = StatusBarFrame(self.mainWindow)
         self.status_bar_frame.frame.grid(row=3, column=0, columnspan=4, sticky="nswe", padx=3, pady=(0, 3))
 
-    def show_or_create_dcc_gui(self, port=5000):
+    def show_or_create_dcc_gui(self, dcc, port=5000):
         try:
             # Clean up closed windows
             self.dcc_guis = [gui for gui in self.dcc_guis if gui.window.winfo_exists()]
@@ -96,7 +96,7 @@ class WoodyApp:
                     pass
             else:
                 # Create new GUI for this port
-                new_gui = DccGui(port)
+                new_gui = DccGui(dcc, port)
                 self.dcc_guis.append(new_gui)
                 new_gui.window.deiconify()
                 new_gui.window.lift()

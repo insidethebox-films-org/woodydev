@@ -1,6 +1,6 @@
 from .. import style
-from ...lib.mongodb.create_blend_db import create_blend_db
-#from ...plugins.blender import Blender
+from ...lib.mongodb.create_scene_db import create_scene_db
+from ...dcc.blender.create_blend_file import create_file
 from ...tool.memory_store import store
 
 import re
@@ -54,15 +54,15 @@ class CreateBlendWindow:
             self.createBlendButton.configure(state="disabled")      
     
     def create_blend_file(self):
-        
+        dcc = "blender"
         data = store.get_namespace("browser_selection")
         root = str.lower(data["root"])
         group = data["group"]
         element = data["element"]
         
-        blend_name = self.blendNameEntry.get().strip()
+        scene_name = self.blendNameEntry.get().strip()
         # Validate blend name - prevent _latest and _v* patterns
-        if self._is_invalid_blend_name(blend_name):
+        if self._is_invalid_blend_name(scene_name):
             print(
                 "Invalid Name", 
                 "Blend name cannot contain '_latest' or version suffixes like '_v1', '_v2', etc.\n"
@@ -71,18 +71,18 @@ class CreateBlendWindow:
             return
         
         # Append _latest to the blend name for file creation
-        blend_name_with_latest = f"{blend_name}_latest.blend"
+        blend_name_with_latest = f"{scene_name}_latest.blend"
         
         # Try to create the database entry first
-        if create_blend_db(root, group, element, blend_name):
-            # Only create the file if database entry was successful
-            # self.blender.create_file(
-            #     root,
-            #     group,
-            #     element,
-            #     blend_name_with_latest
-            # )
-            # print(f"Blend file created successfully: {blend_name_with_latest}")
+        if create_scene_db(root, group, element, scene_name, dcc):
+            #Only create the file if database entry was successful
+            create_file(
+                root,
+                group,
+                element,
+                blend_name_with_latest
+            )
+            print(f"Blend file created successfully: {blend_name_with_latest}")
             print("Not creating file cause blender code is commented out")
         else:
             print("Failed to create database entry - blend file not created")

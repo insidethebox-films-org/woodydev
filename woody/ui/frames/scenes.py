@@ -1,7 +1,7 @@
 from .. import style
 from ..widgets import CTkListbox
 from ...tool.memory_store import store
-from .operations.get_blends_docs import get_blends, get_blend_versions
+from .operations.get_scenes_docs import get_scenes, get_scene_versions
 from .operations.utils import sort_versions
 
 from ...objects.dcc import DCC
@@ -17,7 +17,7 @@ class ScenesFrame:
         self.create_widgets()
         self.browser_selection = None
         
-        self.open_blend_button.configure(state="disabled")
+        self.open_scene_button.configure(state="disabled")
             
     def create_frame(self):
         self.frame = ctk.CTkFrame(
@@ -35,19 +35,19 @@ class ScenesFrame:
         
     def clear_scenes(self):
         self.browser_selection = None
-        self.blends_list_box.delete(0, "END")
-        self.blend_version_list_box.delete(0, "END")
-        self.open_blend_button.configure(state="disabled")
+        self.scenes_list_box.delete(0, "END")
+        self.scene_version_list_box.delete(0, "END")
+        self.open_scene_button.configure(state="disabled")
         
     def on_element_selected(self, selected):
-        self.open_blend_button.configure(state="disabled")
+        self.open_scene_button.configure(state="disabled")
         
         if selected:
             self.browser_selection = selected
             
-            self.blends_list_box.delete(0, "END")
+            self.scenes_list_box.delete(0, "END")
             
-            def get_blends_list(selected, docs):
+            def get_scenes_list(selected, docs):
                 if self.browser_selection != selected:
                     return
                 
@@ -55,48 +55,54 @@ class ScenesFrame:
                 names.sort(key=str.lower)
                 
                 for name in names:
-                    self.blends_list_box.insert("END", name)
+                    self.scenes_list_box.insert("END", name)
                 
-            def populate_blends(docs):
-                self.frame.after(0, get_blends_list, selected, docs)
+            def populate_scenes(docs):
+                self.frame.after(0, get_scenes_list, selected, docs)
                     
-            get_blends(callback=populate_blends)
+            get_scenes(callback=populate_scenes)
     
-    def on_blend_selected(self, selected):
-        self.open_blend_button.configure(state="disabled")
+    def on_scene_selected(self, selected):
+        self.open_scene_button.configure(state="disabled")
         
         def get_versions_list(docs):
             
-            self.blend_version_list_box.delete(0, "END")
+            self.scene_version_list_box.delete(0, "END")
             
-            if not docs or not docs.get("blend_files"):
+            if not docs or not docs.get("files"):
                 return
                 
-            versions = list(docs.get("blend_files").values())
+            versions = list(docs.get("files").values())
             sorted_versions = sorted(versions, key=sort_versions)
 
             for version in sorted_versions:
-                self.blend_version_list_box.insert("END", version)
+                self.scene_version_list_box.insert("END", version)
         
         def populate_versions(docs):
             self.frame.after(0, get_versions_list, docs)
         
-        get_blend_versions(selected, callback=populate_versions)
+        get_scene_versions(selected, callback=populate_versions)
         
     def on_version_selected(self, selected):
         if selected:
-            self.open_blend_button.configure(state="normal")
+            self.open_scene_button.configure(state="normal")
         else:
-            self.open_blend_button.configure(state="disabled")
+            self.open_scene_button.configure(state="disabled")
             
-    def on_open_blend_file(self):
+    def on_open_scene_file(self):
         print("Opening scene file...")
         dcc = "blender"
+        
+        data = store.get_namespace("browser_selection")
+        root = data.get("root", "").lower()
+        group = data.get("group", "")
+        element = data.get("element", "")
+        scene = f"{self.scenes_list_box.get()}_{self.scene_version_list_box.get()}"
         
         cls = DCC.registry.get(dcc.lower())
         if not cls:
             raise ValueError("Unknown DCC")
-        cls().open_file()
+        cls().open_file(root, group, element, scene)
         
         
     def create_widgets(self):
@@ -118,76 +124,76 @@ class ScenesFrame:
         )
         self.header_label.grid(row=0, pady=7, padx=12, sticky="w")
         
-        # Blends listbox
-        self.blends_list_box = CTkListbox(
+        # scenes listbox
+        self.scenes_list_box = CTkListbox(
             self.frame,
             **style.LIST_BOX_STYLE,
             
-            command=self.on_blend_selected
+            command=self.on_scene_selected
             )
-        self.blends_list_box.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(3,5), padx=5)
+        self.scenes_list_box.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(3,5), padx=5)
         
-        # Blend versions title
-        self.blend_versions_title_frame = ctk.CTkFrame(
+        # scene versions title
+        self.scene_versions_title_frame = ctk.CTkFrame(
             self.frame,
             corner_radius=5,
             fg_color="#222222",
             height=30
         )
-        self.blend_versions_title_frame.grid(row=2, padx=(7,3), pady=(0, 5), sticky="ew")
-        self.blend_versions_title_frame.grid_propagate(False)
+        self.scene_versions_title_frame.grid(row=2, padx=(7,3), pady=(0, 5), sticky="ew")
+        self.scene_versions_title_frame.grid_propagate(False)
         
-        self.blend_versions_title_label = ctk.CTkLabel(
-            self.blend_versions_title_frame,
+        self.scene_versions_title_label = ctk.CTkLabel(
+            self.scene_versions_title_frame,
             text="Scene Versions:",
             **style.SUB_HEADER_LABEL
         )
-        self.blend_versions_title_label.grid(row=0, padx=12, sticky="w")
+        self.scene_versions_title_label.grid(row=0, padx=12, sticky="w")
         
-        # Blend options title
-        self.blend_options_title_frame = ctk.CTkFrame(
+        # scene options title
+        self.scene_options_title_frame = ctk.CTkFrame(
             self.frame,
             corner_radius=5,
             fg_color="#222222",
             height=30
         )
-        self.blend_options_title_frame.grid(row=2, column=1, padx=(0,7), pady=(0, 5), sticky="ew")
-        self.blend_options_title_frame.grid_propagate(False)
+        self.scene_options_title_frame.grid(row=2, column=1, padx=(0,7), pady=(0, 5), sticky="ew")
+        self.scene_options_title_frame.grid_propagate(False)
         
-        self.blend_options_title_label = ctk.CTkLabel(
-            self.blend_options_title_frame,
+        self.scene_options_title_label = ctk.CTkLabel(
+            self.scene_options_title_frame,
             text="Scene Options:",
             **style.SUB_HEADER_LABEL
         )
-        self.blend_options_title_label.grid(row=0, padx=12, sticky="w")
+        self.scene_options_title_label.grid(row=0, padx=12, sticky="w")
         
-        # Blend versions listbox
-        self.blend_version_list_box = CTkListbox(
+        # scene versions listbox
+        self.scene_version_list_box = CTkListbox(
             self.frame,
             **style.LIST_BOX_STYLE,
             
             command=self.on_version_selected
             )
-        self.blend_version_list_box.grid(row=3, column=0, sticky="nsew", pady=(0,5), padx=5)
+        self.scene_version_list_box.grid(row=3, column=0, sticky="nsew", pady=(0,5), padx=5)
         
         # Scene options frame
-        self.blend_options_frame = ctk.CTkFrame(
+        self.scene_options_frame = ctk.CTkFrame(
             self.frame,
             corner_radius=5,
             border_width=2,
             fg_color="transparent",
             height=30
         )
-        self.blend_options_frame.grid(row=3, column=1, padx=(0,7), pady=(0, 5), sticky="nsew")
-        self.blend_options_frame.grid_propagate(False)
-        self.blend_options_frame.grid_columnconfigure(0, weight=1)
+        self.scene_options_frame.grid(row=3, column=1, padx=(0,7), pady=(0, 5), sticky="nsew")
+        self.scene_options_frame.grid_propagate(False)
+        self.scene_options_frame.grid_columnconfigure(0, weight=1)
         
         # Open scene button
-        self.open_blend_button = ctk.CTkButton(
-            self.blend_options_frame,
+        self.open_scene_button = ctk.CTkButton(
+            self.scene_options_frame,
             text="Open Scene",
             **style.BUTTON_STYLE,
             
-            command=self.on_open_blend_file
+            command=self.on_open_scene_file
         )
-        self.open_blend_button.grid(row=0, padx=7, pady=8, sticky="ew")
+        self.open_scene_button.grid(row=0, padx=7, pady=8, sticky="ew")
