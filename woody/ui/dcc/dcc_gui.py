@@ -101,6 +101,51 @@ class DccGui:
         )
         self.group_list_box.grid(row=6, column=0, columnspan=2, sticky="new", pady=5, padx=8)
         
+        self.publish_entry = ctk.CTkEntry(
+            self.frame,
+            placeholder_text="Publish Name",
+            placeholder_text_color="grey"
+        )
+        self.publish_entry.grid(row=7, column=0, sticky="new", padx=(8,2), pady=2)
+
+        self.publish_type_comboBox = ctk.CTkComboBox(
+            self.frame,
+            state="readonly",
+            values=[".obj",".abc",".fbx"]
+        )
+        self.publish_type_comboBox.grid(row=7, column=1, sticky="new", padx=(2,8), pady=2)
+        self.publish_type_comboBox.set(".obj")
+
+        self.publish_button = ctk.CTkButton(
+            self.frame,
+            text="Publish",
+            **style.DCC_BUTTON_STYLE,
+            command=""
+        )
+        self.publish_button.grid(row=8, column=0, columnspan=2, sticky="nwe", padx=8, pady=4)
+
+        self.settings_label = ctk.CTkLabel(
+            self.frame, 
+            text="Settings",
+            **style.SUB_HEADER_LABEL
+        )
+        self.settings_label.grid(row= 9, column=0, sticky="nw", padx=8, pady=(0,2))  
+        
+        self.render_settings_button = ctk.CTkButton(
+            self.frame,
+            text="Render Settings",
+            **style.DCC_BUTTON_STYLE,
+            command=""
+        )
+        self.render_settings_button.grid(row=10, column=0, sticky="nwe", padx=(8,2), pady=2)
+        
+        self.frame_range_button = ctk.CTkButton(
+            self.frame,
+            text="Frame Range",
+            **style.DCC_BUTTON_STYLE,
+            command=""
+        )
+        self.frame_range_button.grid(row=10, column=1, sticky="nwe", padx=(2,8), pady=2)
 
     def run(self):
         self.window.wait_window()
