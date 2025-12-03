@@ -231,6 +231,8 @@ class AssetDetailsFrame:
             print("Update complete:", result)
             if self.mode_combo_box.get() == "Element" and self.browser_selection:
                 self.update_mode_items(self.browser_selection)
+                
+        if not hasattr(self, 'mode_combo_box'): return
         
         if self.mode_combo_box.get() == "Render Settings":
             render_type = self.render_settings_type_combo.get().lower()
