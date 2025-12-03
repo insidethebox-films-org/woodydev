@@ -19,5 +19,10 @@ class DCC(ABC):
         pass
     
     @abstractmethod
-    def set_frame_range(self, port):
+    def set_frame_range(self, port, woody_id):
         pass
+    
+    @abstractmethod
+    def set_render_settings(self, port):
+        pass
+    
