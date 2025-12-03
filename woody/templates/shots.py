@@ -3,7 +3,7 @@ shots_template = {
     "parent_id": "",
     "sequence": "",
     "name": "",
-        "frame_range": {
+    "frame_range": {
         "start_frame": 1001,
         "end_frame": 1100
     },
