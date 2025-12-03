@@ -193,13 +193,13 @@ class AssetDetailsFrame:
         if selected:
             self.browser_selection = selected
             
-            if self.mode_combo_box.get() == "Element":
+            if hasattr(self, 'mode_combo_box') and self.mode_combo_box.get() == "Element":
                 def populate_details(docs):
                     self.clear_mode_items()
                     self.frame.after(0, self.create_asset_details, docs)
                 get_asset_details(callback=populate_details)
                 
-            elif self.mode_combo_box.get() == "Render Settings":
+            elif hasattr(self, 'mode_combo_box') and self.mode_combo_box.get() == "Render Settings":
                 def populate_details(docs):
                     self.clear_mode_items()
                     self.frame.after(0, self.create_render_settings, docs)

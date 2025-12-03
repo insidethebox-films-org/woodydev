@@ -2,9 +2,9 @@ global_render_settings_template = {
     "render_settings": True,
     "type": "global",
     "resolution": {
-            "x": 1920,
-            "y": 1080
-        },
+        "x": 1920,
+        "y": 1080
+    },
     "framerate": 24,
     "file_format": "",
     "colour_space": ""

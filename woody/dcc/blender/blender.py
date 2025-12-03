@@ -6,8 +6,6 @@ from ...dcc.database.get_render_settings import get_render_settings
 
 import subprocess
 import os
-import json
-
 @DCC.register("blender")
 class Blender(DCC):
     
