@@ -13,3 +13,11 @@ class DCC(ABC):
     @abstractmethod
     def open_file(self, root, group, element, scene):
         pass
+    
+    @abstractmethod
+    def save_file(self, port):
+        pass
+    
+    @abstractmethod
+    def set_frame_range(self, port):
+        pass

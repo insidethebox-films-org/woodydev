@@ -19,9 +19,6 @@ while True:
     if PORT != 6001:
         break
 
-# Store PORT in window manager for addon access
-bpy.context.window_manager["woody_socket_port"] = PORT
-
 operation_queue = queue.Queue()
 
 def run_operation(data):
@@ -79,6 +76,31 @@ def socket_loop():
             break
 
     s.close()
+    
+def set_session():
+    bpy.context.window_manager["woody_socket_port"] = PORT
 
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
+    PREFS_PATH = os.path.join(ROOT_DIR, "prefs", "dcc.json")
+
+    woody_id = os.environ.get("WOODY_CURRENT_ID")
+
+    os.makedirs(os.path.dirname(PREFS_PATH), exist_ok=True)
+    try:
+        data = {}
+        if os.path.exists(PREFS_PATH):
+            with open(PREFS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        data[f"dcc_session ({PORT})"] = {
+            "woody_id": woody_id,
+            "port": PORT,
+        }
+        with open(PREFS_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
+        print(f"[Woody] Wrote dcc_session to {PREFS_PATH}: {data[f'dcc_session ({PORT})']}")
+    except Exception as e:
+        print(f"[Woody] Failed to write prefs.json: {e}")
+
+set_session()
 threading.Thread(target=socket_loop, daemon=True).start()
 bpy.app.timers.register(process_operations)

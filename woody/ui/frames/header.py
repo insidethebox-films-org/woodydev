@@ -142,7 +142,7 @@ class HeaderFrame:
         self.projectComboBox = ctk.CTkComboBox(
             self.project_picker_frame,
             values="",
-            height=25,
+            **style.COMBO_BOX_STYLE,
             state="readonly",
             command=self.set_project_name_settings
         )

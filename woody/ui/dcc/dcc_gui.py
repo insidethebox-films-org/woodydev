@@ -1,14 +1,22 @@
 from .. import style
 from ..widgets.ctk_list_box import CTkListbox
-from ...dcc.blender.client_socket import execute_operation
+from ...tool.woody_id import get_dcc_woody_id
+from ...objects.dcc import DCC
 
 import os
 import customtkinter as ctk
 
 class DccGui:
     def __init__(self, dcc, port=5000):
-        self.dcc = dcc
+        cls = DCC.registry.get(dcc.lower())
+        if not cls:
+            raise ValueError("Unknown DCC")
+        
+        self.dcc = cls()
+        self.dcc_name = dcc
         self.port = port
+        self.woody_id = get_dcc_woody_id(port)
+        
         self.window = ctk.CTkToplevel()
         self.window.title(f"{dcc} Controller")
         self.window.geometry("300x500")
@@ -32,21 +40,28 @@ class DccGui:
         
         self.create_widgets()
         
-    def add_cube(self):
-        def print_result(result):
-            print(f"Object Added: {result}")
-        execute_operation("create_cube", port=self.port, on_success=print_result)
+#==============================
+# Button Operations
+#==============================
         
     def save(self):
-        def print_result(result):
-            print(result)
-        execute_operation("save", port=self.port, on_success=print_result)
+        self.dcc.save_file(self.port)
+        
+    def set_frame_range(self):
+        self.dcc.set_frame_range(self.port, self.woody_id)
+        
+    def set_render_settings(self):
+        self.dcc.set_render_settings(self.port)
+        
+#==============================
+# UI
+#==============================
         
     def create_widgets(self):
         
         self.dcc_label = ctk.CTkLabel(
             self.frame, 
-            text=f"{self.dcc} (Port: {self.port})",
+            text=f"{self.dcc_name} (Port: {self.port})",
             **style.HEADER_LABEL
         )
         self.dcc_label.grid(row= 0, column=0, sticky="nw", padx=8, pady=(8, 0), columnspan=2)  
@@ -135,7 +150,7 @@ class DccGui:
             self.frame,
             text="Render Settings",
             **style.DCC_BUTTON_STYLE,
-            command=""
+            command=self.set_render_settings
         )
         self.render_settings_button.grid(row=10, column=0, sticky="nwe", padx=(8,2), pady=2)
         
@@ -143,7 +158,7 @@ class DccGui:
             self.frame,
             text="Frame Range",
             **style.DCC_BUTTON_STYLE,
-            command=""
+            command=self.set_frame_range
         )
         self.frame_range_button.grid(row=10, column=1, sticky="nwe", padx=(2,8), pady=2)
 

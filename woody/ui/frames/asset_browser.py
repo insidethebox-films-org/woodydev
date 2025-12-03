@@ -35,6 +35,10 @@ class AssetBrowserFrame:
         
         if hasattr(self, "scenes_frame"):
             self.scenes_frame.clear_scenes()
+        if hasattr(self, "asset_details_frame"):
+            # Only clear if in Element mode
+            if self.asset_details_frame.mode_combo_box.get() == "Element":
+                self.asset_details_frame.clear_mode_items()
         
         def populate_groups(docs):
             names = [doc.get("name") for doc in docs if doc.get("name")]
@@ -54,7 +58,9 @@ class AssetBrowserFrame:
         if hasattr(self, "scenes_frame"):
             self.scenes_frame.clear_scenes()
         if hasattr(self, "asset_details_frame"):
-            self.asset_details_frame.clear_details()
+            # Only clear if in Element mode
+            if self.asset_details_frame.mode_combo_box.get() == "Element":
+                self.asset_details_frame.clear_mode_items()
         
         def populate_elements(docs):
             names = [doc.get("name") for doc in docs if doc.get("name")]
@@ -77,10 +83,15 @@ class AssetBrowserFrame:
                 
         if hasattr(self, "asset_details_frame"):
             if selected:
-                self.asset_details_frame.update_details(selected)
+                # Only clear if in Element mode
+                if self.asset_details_frame.mode_combo_box.get() == "Element":
+                    self.asset_details_frame.clear_mode_items()
+                self.asset_details_frame.update_mode_items(selected)
             else:
-                self.asset_details_frame.clear_details()
- 
+                # Only clear if in Element mode
+                if self.asset_details_frame.mode_combo_box.get() == "Element":
+                    self.asset_details_frame.clear_mode_items()
+    
             
     def create_widgets(self):
         
@@ -102,7 +113,7 @@ class AssetBrowserFrame:
             
             command=self.on_group_selection
         )
-        self.group_list_box.grid(row=0, column=1, sticky="nsew", pady=5, padx=(5,0))
+        self.group_list_box.grid(row=0, column=1, sticky="nsew", pady=5, padx=(2,0))
         
         # Element list box
         self.element_list_box = CTkListbox(
@@ -111,5 +122,5 @@ class AssetBrowserFrame:
             
             command=self.on_element_selection
         )
-        self.element_list_box.grid(row=0, column=2, sticky="nsew", pady=5, padx=5)
+        self.element_list_box.grid(row=0, column=2, sticky="nsew", pady=5, padx=(2,5))
         

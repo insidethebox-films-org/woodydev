@@ -5,6 +5,7 @@ from .shots import shots_template
 from .groups import groups_template
 from .sequences import sequences_template
 from .assets_versions import assets_versions_template
+from .render_settings import global_render_settings_template, blender_render_settings_template
 
 __all__ = [
     "settings_template",
@@ -13,5 +14,7 @@ __all__ = [
     "shots_template",
     "groups_template",
     "sequences_template",
-    "assets_versions_template"
+    "assets_versions_template",
+    "global_render_settings_template",
+    "blender_render_settings_template"
 ]

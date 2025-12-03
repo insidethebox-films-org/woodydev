@@ -24,6 +24,8 @@ class WoodyApp:
         # Initialize socket handler
         self.socket = ControlSocket()
         
+        self.mainWindow.protocol("WM_DELETE_WINDOW", self.on_close)
+        
         # Create ui
         self.setup_ui()
 
@@ -110,6 +112,24 @@ class WoodyApp:
 
     def run(self):
         self.mainWindow.mainloop()
+        
+    def on_close(self):
+        try:
+            prefs_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),  # ..\woodydev
+                "prefs",
+                "dcc.json",
+            )
+            try:
+                if os.path.exists(prefs_path):
+                    os.remove(prefs_path)
+                    print(f"Deleted {prefs_path}")
+                else:
+                    print(f"{prefs_path} does not exist")
+            except Exception as e:
+                print(f"Failed to delete {prefs_path}: {e}")
+        finally:
+            self.mainWindow.destroy()
 
 
 __all__ = ['WoodyApp']

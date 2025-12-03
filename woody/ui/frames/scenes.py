@@ -3,9 +3,9 @@ from ..widgets import CTkListbox
 from ...tool.memory_store import store
 from .operations.get_scenes_docs import get_scenes, get_scene_versions
 from .operations.utils import sort_versions
+from ...tool.woody_id import get_browser_selection_id
 
 from ...objects.dcc import DCC
-from ...dcc.blender.blender import Blender
 
 import re
 import customtkinter as ctk
@@ -93,16 +93,19 @@ class ScenesFrame:
         print("Opening scene file...")
         dcc = "blender"
         
+        woody_id = get_browser_selection_id(element_id=True)
+        
         data = store.get_namespace("browser_selection")
         root = data.get("root", "").lower()
         group = data.get("group", "")
         element = data.get("element", "")
         scene = f"{self.scenes_list_box.get()}_{self.scene_version_list_box.get()}"
+
         
         cls = DCC.registry.get(dcc.lower())
         if not cls:
             raise ValueError("Unknown DCC")
-        cls().open_file(root, group, element, scene)
+        cls().open_file(root, group, element, scene, woody_id)
         
         
     def create_widgets(self):
