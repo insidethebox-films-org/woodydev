@@ -52,18 +52,6 @@ def get_render_settings(callback):
     
     thread = threading.Thread(target=run, daemon=True)
     thread.start()
-    
-def update_nested_dict(doc, key, value):
-    if key in doc:
-        doc[key] = value
-        return True
-    
-    for k, v in doc.items():
-        if isinstance(v, dict):
-            if update_nested_dict(v, key, value):
-                return True
-    
-    return False
 
 async def update_asset_details_async(updates):
     db = Database()
