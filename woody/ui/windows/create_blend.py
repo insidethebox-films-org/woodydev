@@ -83,7 +83,6 @@ class CreateBlendWindow:
                 blend_name_with_latest
             )
             print(f"Blend file created successfully: {blend_name_with_latest}")
-            print("Not creating file cause blender code is commented out")
         else:
             print("Failed to create database entry - blend file not created")
        

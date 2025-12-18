@@ -50,7 +50,7 @@ class Directory():
         if current_os == 'Darwin':
             return Path(f"/Volumes/{location}/{project_name}/".replace('\\', '/'))
         elif platform.system() == "Windows":
-            return Path(f"\\\{host_address}\\{location}\\{project_name}\\")
+            return Path(f"\\\\{host_address}\\{location}\\{project_name}\\")
         else:
             print("System not recognized")
             return None

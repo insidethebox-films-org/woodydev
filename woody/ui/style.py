@@ -53,6 +53,14 @@ BUTTON_STYLE = {
     "font": FONTS["body"]
 }
 
+WARNING_BUTTON_STYLE = {
+    "fg_color": "#C95555",
+    "hover_color": "#803939",
+    "text_color": COLORS["text"],
+    "corner_radius": 5,
+    "font": FONTS["body"]
+}
+
 INPUT_DIALOG_STYLE = {
     "button_fg_color": COLORS["foreground"],
     "button_hover_color": COLORS["hover"],
@@ -65,4 +73,10 @@ LIST_BOX_STYLE = {
     "border_width":2,
     "bg_color": "#242424",
     "fg_color": "#242424",
+}
+
+COMBO_BOX_STYLE = {
+    "height": 25,
+    "border_width": 0,
+    "button_color": COLORS["foreground"]
 }

@@ -1,4 +1,5 @@
 from ...templates.settings import settings_template
+from ...templates.render_settings import global_render_settings_template, blender_render_settings_template
 from ...objects import Database
 
 import asyncio
@@ -23,8 +24,11 @@ async def create_project_db_async(name, host_address, directory):
         settings["location"] = directory
         settings["created_time"] = datetime.now()
         
+        render_settings = copy.deepcopy(global_render_settings_template)
+        blender_render_settings = copy.deepcopy(blender_render_settings_template)
+        
         collection = db["settings"]
-        await collection.insert_one(settings)
+        await collection.insert_many([settings, render_settings, blender_render_settings])
     
     except Exception as e:
         print(f"Error creating settings document: {str(e)}")
