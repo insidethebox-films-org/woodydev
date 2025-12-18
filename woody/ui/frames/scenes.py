@@ -4,10 +4,11 @@ from ...tool.memory_store import store
 from .operations.get_scenes_docs import get_scenes, get_scene_versions
 from .operations.utils import sort_versions
 from ...tool.woody_id import get_browser_selection_id
+from ..utils.load_icon import load_icon
 
 from ...objects.dcc import DCC
 
-import re
+import os
 import customtkinter as ctk
 
 class ScenesFrame:
@@ -51,11 +52,22 @@ class ScenesFrame:
                 if self.browser_selection != selected:
                     return
                 
-                names = [doc.get("name") for doc in docs if doc.get("name")]
-                names.sort(key=str.lower)
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                icons_dir = os.path.join(current_dir, "..", "..", "icons", "scenes")
                 
-                for name in names:
-                    self.scenes_list_box.insert("END", name)
+                items = [(doc.get("name"), doc.get("dcc", "unknown")) for doc in docs if doc.get("name")]
+                items.sort(key=lambda x: x[0].lower())
+                
+                for name, dcc in items:
+                    icon = None
+                    try:
+                        icon_path = os.path.join(icons_dir, f"{dcc.lower()}.png")
+                        if os.path.exists(icon_path):
+                            icon = load_icon(icon_path, 18)
+                    except Exception as e:
+                        print(f"Error loading icon for {dcc}: {e}")
+                    
+                    self.scenes_list_box.insert("END", name, icon=icon)
                 
             def populate_scenes(docs):
                 self.frame.after(0, get_scenes_list, selected, docs)

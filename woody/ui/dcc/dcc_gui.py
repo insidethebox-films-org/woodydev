@@ -15,7 +15,7 @@ class DccGui:
         self.dcc = cls()
         self.dcc_name = dcc
         self.port = port
-        self.woody_id = get_dcc_woody_id(port)
+        self.woody_id = os.environ.get("WOODY_CURRENT_ID")
         
         self.window = ctk.CTkToplevel()
         self.window.title(f"{dcc} Controller")

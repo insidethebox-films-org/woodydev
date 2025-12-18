@@ -15,9 +15,11 @@ def set_render_settings(render_settings):
         
         render.fps = int(global_settings["framerate"])
         
-        #render.image_settings.file_format = global_settings["file_format"]
+        if global_settings["file_format"] != "":
+            render.image_settings.file_format = global_settings["file_format"]
         
-        #view.view_transform = global_settings["colour_space"]
+        if global_settings["colour_space"] != "":
+            view.view_transform = global_settings["colour_space"]
 
         if blender_settings["render_engine"] == "Cycles":
             render.engine = 'CYCLES'
