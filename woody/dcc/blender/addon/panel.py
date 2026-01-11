@@ -1,4 +1,5 @@
 import bpy
+import os
 
 class VIEW3D_PT_context(bpy.types.Panel):
     bl_idname = "VIEW3D_PT_woody_context"
@@ -9,13 +10,42 @@ class VIEW3D_PT_context(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        port = context.window_manager.get("woody_socket_port", 5000)
+        port = os.environ.get('BLENDER_TOOL_PORT', 'NOT SET')
 
-        # Woody Tools Section
         rootBox = layout.box()
-        rootBox.label(text=f"Woody (Port: {port})", icon="OUTLINER")
+        rootBox.label(text=f"(Port: {port})", icon="OUTLINER")
         rootBox.scale_y = 0.75
         
-        # Add Version Up button
-        row = rootBox.row()
-        row.operator("woody.launch_ui", text="Launch UI", icon="FILE_REFRESH")
+        # File Section
+        file_box = rootBox.box()
+        file_header = file_box.row()
+        file_header.label(text="File", icon="FILE")
+        file_header.scale_y = 1.2
+        
+        save_row = file_box.row()
+        save_row.operator("woody.save", text="Save", icon="FILE_BLEND")
+        save_row.scale_y = 1.2
+        
+        # Publishing Section
+        publish_outer_box = rootBox.box()
+        publish_header = publish_outer_box.row()
+        publish_header.label(text="Publishing", icon="ASSET_MANAGER")
+        publish_header.scale_y = 1.2
+        
+        publish_outer_box.prop(context.scene.woody, "publish_name", text="Name")
+        publish_outer_box.prop(context.scene.woody, "publish_type", text="Type")
+        
+        publish_row = publish_outer_box.row()
+        publish_row.operator("woody.publish", text="Publish", icon="SHADING_RENDERED")
+        publish_row.scale_y = 1.2
+        
+        # Metadata Section
+        metadata_box = rootBox.box()
+        metadata_header = metadata_box.row()
+        metadata_header.label(text="Metadata", icon="PROPERTIES")
+        metadata_header.scale_y = 1.2
+        
+        metadata_row = metadata_box.row()
+        metadata_row.operator("woody.set_frame_range", text="Frame Range", icon="NEXT_KEYFRAME")
+        metadata_row.operator("woody.set_render_settings", text="Render Settings", icon="RENDER_RESULT")
+        metadata_row.scale_y = 1.2

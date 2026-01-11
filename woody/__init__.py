@@ -1,6 +1,4 @@
-from .ui import *
-from .ui.dcc.dcc_gui import DccGui
-from .objects.control_socket import ControlSocket
+from .ui.tool import *
 
 import customtkinter
 import os
@@ -18,19 +16,20 @@ class WoodyApp:
         icon_path = os.path.join(os.path.dirname(__file__), "icons", "woodyIcon.ico")
         self.mainWindow.iconbitmap(icon_path)
         
-        # Track DccGui instances (one per DCC/file)
-        self.dcc_guis = []
-        
-        # Initialize socket handler
-        self.socket = ControlSocket()
-        
-        self.mainWindow.protocol("WM_DELETE_WINDOW", self.on_close)
-        
         # Create ui
         self.setup_ui()
+        
+    def show_asset_view(self):
+        self.scenes_frame.frame.grid()
+        self.publishes_frame.frame.grid()
+        self.asset_details_frame.frame.grid()
+        self.asset_browser_frame.frame.grid()
+        self.renders_frame.frame.grid_remove()
 
-        # Start control server
-        self.socket.start_control_server(self)
+    def show_render_view(self):
+        self.scenes_frame.frame.grid_remove()
+        self.publishes_frame.frame.grid_remove()
+        self.renders_frame.frame.grid()
     
     def setup_ui(self):
         
@@ -44,92 +43,48 @@ class WoodyApp:
         self.mainWindow.grid_columnconfigure(2, weight=3)
         self.mainWindow.grid_columnconfigure(3, weight=3)
         
-        # Header
-        self.header_frame = HeaderFrame(self.mainWindow)
-        self.header_frame.frame.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=3, pady=(3, 1))
-        
-        # Tools
-        self.tools_frame = ToolsFrame(self.mainWindow)
-        self.tools_frame.frame.grid(row=1, column=0, rowspan=2, sticky="nswe", padx=(3, 1), pady=3)
-        
-        # Scenes
-        self.scenes_frame = ScenesFrame(self.mainWindow)
-        self.scenes_frame.frame.grid(row=2, column=2, sticky="nswe", padx=(3, 0), pady=(0, 3))
-        
-        # Asset Details
-        self.asset_details_frame = AssetDetailsFrame(self.mainWindow)
-        self.asset_details_frame.frame.grid(row=2, column=1, sticky="nswe", padx=(3, 0), pady=(0, 3))
-        
-        # Asset Browser
-        self.asset_browser_frame = AssetBrowserFrame(self.mainWindow)
-        self.asset_browser_frame.frame.grid(row=1, column=1, columnspan=3, sticky="nswe", padx=3, pady=3)
-        self.header_frame.asset_browser = self.asset_browser_frame
-        self.asset_browser_frame.scenes_frame = self.scenes_frame
-        self.asset_browser_frame.asset_details_frame = self.asset_details_frame
-
-        # Publishes
-        self.publishes_frame = PublishesFrame(self.mainWindow)
-        self.publishes_frame.frame.grid(row=2, column=3, sticky="nswe", padx=3, pady=(0, 3))
-
         # Status Bar
         self.status_bar_frame = StatusBarFrame(self.mainWindow)
         self.status_bar_frame.frame.grid(row=3, column=0, columnspan=4, sticky="nswe", padx=3, pady=(0, 3))
+        
+        # Header
+        self.header_frame = HeaderFrame(self.mainWindow, self.status_bar_frame)
+        self.header_frame.frame.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=3, pady=(3, 1))
+        
+        # Tools
+        self.tools_frame = ToolsFrame(self.mainWindow, self, self.status_bar_frame)
+        self.tools_frame.frame.grid(row=1, column=0, rowspan=2, sticky="nswe", padx=(3, 1), pady=3)
+        self.tools_frame.header_frame = self.header_frame
+        
+        # Scenes
+        self.scenes_frame = ScenesFrame(self.mainWindow, self.status_bar_frame)
+        self.scenes_frame.frame.grid(row=2, column=2, sticky="nswe", padx=(3, 0), pady=(0, 3))
+        
+        # Publishes
+        self.publishes_frame = PublishesFrame(self.mainWindow, self.status_bar_frame)
+        self.publishes_frame.frame.grid(row=2, column=3, sticky="nswe", padx=3, pady=(0, 3))
+        
+        # Renders
+        self.renders_frame = RendersFrame(self.mainWindow, self.status_bar_frame)
+        self.renders_frame.frame.grid(row=2, column=2, columnspan=2, sticky="nsew", padx=3, pady=(0,3))
+        
+        # Asset Details
+        self.asset_details_frame = AssetDetailsFrame(self.mainWindow, self.status_bar_frame)
+        self.asset_details_frame.frame.grid(row=2, column=1, sticky="nswe", padx=(3, 0), pady=(0, 3))
+        
+        # Asset Browser
+        self.asset_browser_frame = AssetBrowserFrame(self.mainWindow, self.status_bar_frame)
+        self.asset_browser_frame.frame.grid(row=1, column=1, columnspan=3, sticky="nswe", padx=3, pady=3)
+        self.header_frame.asset_browser = self.asset_browser_frame
+        self.asset_browser_frame.scenes_frame = self.scenes_frame
+        self.asset_browser_frame.publishes_frame = self.publishes_frame
+        self.asset_browser_frame.renders_frame = self.renders_frame
+        self.asset_browser_frame.asset_details_frame = self.asset_details_frame
 
-    def show_or_create_dcc_gui(self, dcc, port=5000):
-        try:
-            # Clean up closed windows
-            self.dcc_guis = [gui for gui in self.dcc_guis if gui.window.winfo_exists()]
-            
-            # Find existing GUI for this port
-            gui = None
-            for g in self.dcc_guis:
-                if g.port == port:
-                    gui = g
-                    break
-            
-            if gui:
-                # Bring existing window to front
-                gui.window.deiconify()
-                gui.window.lift()
-                try:
-                    gui.window.attributes("-topmost", True)
-                    gui.window.after(200, lambda: gui.window.attributes("-topmost", False))
-                except Exception:
-                    pass
-            else:
-                # Create new GUI for this port
-                new_gui = DccGui(dcc, port)
-                self.dcc_guis.append(new_gui)
-                new_gui.window.deiconify()
-                new_gui.window.lift()
-                try:
-                    new_gui.window.attributes("-topmost", True)
-                    new_gui.window.after(200, lambda: new_gui.window.attributes("-topmost", False))
-                except Exception:
-                    print(f"Error setting topmost attribute for new_gui.window: {Exception}")
-        except Exception as e:
-            print(f"Error in show_or_create_dcc_gui: {e}")
+        # Operations
+        self.tools_frame.toggle_asset_view()
 
     def run(self):
         self.mainWindow.mainloop()
-        
-    def on_close(self):
-        try:
-            prefs_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),  # ..\woodydev
-                "prefs",
-                "dcc.json",
-            )
-            try:
-                if os.path.exists(prefs_path):
-                    os.remove(prefs_path)
-                    print(f"Deleted {prefs_path}")
-                else:
-                    print(f"{prefs_path} does not exist")
-            except Exception as e:
-                print(f"Failed to delete {prefs_path}: {e}")
-        finally:
-            self.mainWindow.destroy()
-
 
 __all__ = ['WoodyApp']

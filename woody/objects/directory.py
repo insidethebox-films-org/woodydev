@@ -19,7 +19,7 @@ class Directory():
         
         self.mount_local_drive(self.host_address, self.location)
         
-        self.root_path = self.get_root_path(self.host_address, self.location,  self.project_name)
+        self.root_path = self.get_root_path(self.host_address, self.location, self.project_name)
         
     async def get_settings_async(self, project_name):
     

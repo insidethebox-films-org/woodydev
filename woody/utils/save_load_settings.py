@@ -4,16 +4,18 @@ import json
 settings_path  = Path("prefs") / "prefs.json"
 settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-def save_settings_json(mongoDBAddress=None, blenderExecutable=None, projectName=None):
+def save_settings_json(mongoDBAddress=None, blenderExecutable=None, houdiniExecutable=None, rvExecutable=None, projectName=None):
         
-    # Load existing settings first
     existing_settings = load_settings_json() or {}
     
-    # Only update the values that are provided (not None)
     if mongoDBAddress is not None:
         existing_settings["mongoDBAddress"] = mongoDBAddress
     if blenderExecutable is not None:
         existing_settings["blenderExecutable"] = blenderExecutable
+    if houdiniExecutable is not None:
+        existing_settings["houdiniExecutable"] = houdiniExecutable
+    if rvExecutable is not None:
+        existing_settings["rvExecutable"] = rvExecutable
     if projectName is not None:
         existing_settings["projectName"] = projectName
 

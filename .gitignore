@@ -16,3 +16,7 @@ Thumbs.db
 
 # Ignore Preferences
 prefs/
+
+#Ignore personal hips
+hip_files/
+backup/

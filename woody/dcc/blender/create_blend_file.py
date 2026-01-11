@@ -4,15 +4,6 @@ import os
 import subprocess
 
 def create_blend_file(blend_path: str) -> bool:
-    """Creates a new blend file
-    
-    Args:
-        blend_path (str): Path to the blend file to create
-    
-    Returns:
-        bool: True if blend file was created successfully
-    """
-    
     executable = Directory().get_dcc_executable("blender")
     
     if not executable or not os.path.exists(executable):

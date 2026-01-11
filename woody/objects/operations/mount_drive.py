@@ -39,5 +39,4 @@ def mount_drive(host_address, location):
             print(f"Drive already mounted at {mount}")
             return True
     else:
-        print(f"Mounting not supported on {current_os}, skipping...")
         return False

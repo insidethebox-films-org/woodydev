@@ -16,6 +16,7 @@ FONTS = {
     "title": ("Arial", 14, "bold"),
     "sub_title": ("Arial", 13, "bold"),
     "body": ("Arial", 12),
+    "body_bold": ("Arial", 11, "bold"),
     "small": ("Arial", 10, "italic")
 }
 
@@ -29,6 +30,10 @@ SUB_HEADER_LABEL = {
 
 BODY_LABEL = {
     "font": FONTS["body"]    
+}
+
+BODY_LABEL_BOLD = {
+    "font": FONTS["body_bold"]    
 }
 
 BODY_DANGER = {
@@ -80,3 +85,4 @@ COMBO_BOX_STYLE = {
     "border_width": 0,
     "button_color": COLORS["foreground"]
 }
+

@@ -14,3 +14,5 @@ class Woody():
         self.projectName = settings.get("projectName")
         self.mongoDBAddress = settings.get("mongoDBAddress")
         self.blenderExecutable = settings.get("blenderExecutable")
+        self.houdiniExecutable = settings.get("houdiniExecutable")
+        self.rvExecutable = settings.get("rvExecutable")
