@@ -1,0 +1,4 @@
+{
+    "path": "$WOODY_PACKAGE_PATH/..",
+    "pythonpath": "$WOODY_PACKAGE_PATH/../scripts"
+}
