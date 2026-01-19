@@ -1,0 +1,7 @@
+{
+    "mongoDBAddress": "mongodb://100.113.50.90:2222/",
+    "blenderExecutable": "D:\\_software\\blender-4.2.5-windows-x64\\",
+    "projectName": "devProject",
+    "houdiniExecutable": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\",
+    "rvExecutable": "C:\\Program Files\\OpenRV\\bin"
+}
