@@ -1,0 +1,24 @@
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
+# Ignore VS Code settings
+.vscode/
+.VSCodeCounter/
+
+# Ignore zip files like woody.zip
+
+updateZip.py
+woody_blender_addon.zip
+
+# Ignore OS metadata
+.DS_Store
+Thumbs.db
+
+# Ignore Preferences
+prefs/
+tests/
+
+#Ignore personal hips
+hip_files/
+backup/
